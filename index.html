@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ru">
 
 <head>
@@ -283,6 +283,20 @@
             color: #cc0000;
             background: #ffd0d0;
             border-color: #c00;
+        }
+
+        .role-coowner {
+            color: #7700cc;
+            background: #f0d0ff;
+            border-color: #9900ee;
+        }
+
+        .role-owner {
+            color: #5a3000;
+            background: linear-gradient(90deg, #ffe066, #ffd700, #ffe066);
+            border-color: #b8860b;
+            text-shadow: 0 1px 0 #fff8;
+            box-shadow: 0 0 4px #ffd70055;
         }
 
         /* POSTS */
@@ -573,6 +587,7 @@
         <div class="nav-links">
             <a onclick="showPage('home')">&#127968; Главная</a>
             <a onclick="showPage('forum')" id="nav-forum" style="display:none">&#128172; Форум</a>
+            <a onclick="showPage('search')" id="nav-search" style="display:none">&#128269; Поиск</a>
             <a onclick="showPage('profile')" id="nav-profile" style="display:none">&#128100; Профиль</a>
             <a onclick="showPage('admin')" id="nav-admin" style="display:none">&#128119; Админ</a>
         </div>
@@ -762,6 +777,20 @@
             </div>
         </div>
 
+        <!-- ===== ПОИСК ИГРОКА ===== -->
+        <div id="page-search" style="display:none">
+            <div class="section-header">&#128269; Поиск игрока</div>
+            <div class="form-box">
+                <h2>&#128100; Найти игрока</h2>
+                <div class="form-row">
+                    <label>Логин / Ник:</label>
+                    <input type="text" id="search-query" maxlength="30" placeholder="Введи имя..." onkeydown="if(event.key==='Enter')doSearch()">
+                    <button class="btn btn-primary" onclick="doSearch()">Найти</button>
+                </div>
+            </div>
+            <div id="search-results"></div>
+        </div>
+
         <!-- ===== АДМИН-ПАНЕЛЬ ===== -->
         <div id="page-admin" style="display:none">
             <div class="section-header">&#128119; Админ-панель — Управление пользователями</div>
@@ -773,7 +802,13 @@
                     <span class="role-badge role-vip">ВИП</span>
                     <span class="role-badge role-moder">Модер</span>
                     <span class="role-badge role-admin">Админ</span>
+                    <span class="role-badge role-coowner">Мл.Овнер</span>
+                    <span class="role-badge role-owner">Owner</span>
                 </p>
+                <div class="form-row" style="margin-bottom:8px;">
+                    <label>&#128269; Фильтр:</label>
+                    <input type="text" id="admin-search" placeholder="Поиск по логину / нику..." style="width:200px;" oninput="filterAdminUsers()">
+                </div>
                 <div id="admin-users-list">Загрузка...</div>
             </div>
         </div>
@@ -816,12 +851,13 @@
         }
 
         function showPage(page) {
-            ["home", "auth", "forum", "profile", "admin", "userprofile"].forEach(p => {
+            ["home", "auth", "forum", "profile", "admin", "userprofile", "search"].forEach(p => {
                 document.getElementById("page-" + p).style.display = p === page ? "" : "none";
             });
             if (page === "forum") loadPosts();
             if (page === "admin") loadAdminUsers();
             if (page === "profile") loadProfile();
+            if (page === "search") { document.getElementById("search-query").value = ""; document.getElementById("search-results").innerHTML = ""; }
         }
 
         async function viewProfile(username) {
@@ -875,14 +911,15 @@
             document.getElementById("nav-user-info").innerHTML = username + " " + roleBadge(role);
             document.getElementById("nav-logout").style.display = "inline";
             document.getElementById("nav-forum").style.display = "inline";
+            document.getElementById("nav-search").style.display = "inline";
             document.getElementById("nav-profile").style.display = "inline";
-            document.getElementById("nav-admin").style.display = (role === "admin" || role === "moder") ? "inline" : "none";
+            document.getElementById("nav-admin").style.display = (role === "admin" || role === "moder" || role === "owner" || role === "coowner") ? "inline" : "none";
             document.getElementById("new-post-form").style.display = "";
             showPage("forum");
         }
 
         function roleBadge(role) {
-            const labels = { player: "Игрок", vip: "ВИП", moder: "Модер", admin: "Админ" };
+            const labels = { player: "Игрок", vip: "ВИП", moder: "Модер", admin: "Админ", coowner: "Мл.Овнер", owner: "⭐ Owner" };
             return '<span class="role-badge role-' + role + '">' + (labels[role] || role) + '</span>';
         }
 
@@ -1045,40 +1082,56 @@
         }
 
         // ========== ADMIN ==========
-        async function loadAdminUsers() {
-            const data = await api("GET", "/api/users");
-            if (data.error) { showStatus(data.error, "error"); return; }
+        let allAdminUsers = [];
+
+        function filterAdminUsers() {
+            const q = (document.getElementById("admin-search").value || "").trim().toLowerCase();
+            renderAdminUsers(q ? allAdminUsers.filter(u =>
+                u.username.toLowerCase().includes(q) ||
+                (u.nickname || "").toLowerCase().includes(q)
+            ) : allAdminUsers);
+        }
+
+        function renderAdminUsers(users) {
             const list = document.getElementById("admin-users-list");
             const now = Date.now() / 1000;
+            if (!users.length) { list.innerHTML = '<div class="online-count">Никого не найдено</div>'; return; }
             let html = "";
-            for (const u of data.users) {
+            for (const u of users) {
                 const isBanned = u.ban_until > now;
                 const isMuted = u.mute_until > now;
+                const safeUN = esc(u.username);
                 html += '<div class="admin-row">';
                 html += avatarImg(u.avatar) + ' ';
-                html += '<b>' + esc(u.username) + '</b> ';
+                html += '<b>' + safeUN + '</b> ';
                 if (u.nickname && u.nickname !== u.username) html += '(' + esc(u.nickname) + ') ';
                 html += roleBadge(u.role) + ' ';
                 if (isBanned) html += '<span class="ban-status ban-active">ЗАБАНЕН</span> ';
                 if (isMuted) html += '<span class="ban-status mute-active">ЗАМЬЮЧЕН</span> ';
 
-                if (currentRole === "admin") {
-                    html += '<select id="role-sel-' + esc(u.username) + '">';
+                // Role selector — owner can set coowner; admin can set up to admin; moder no role change
+                const canSetRole = currentRole === "owner" || currentRole === "admin";
+                if (canSetRole) {
+                    html += '<select id="role-sel-' + safeUN + '">';
                     html += '<option value="player"' + (u.role === "player" ? " selected" : "") + '>Игрок</option>';
                     html += '<option value="vip"' + (u.role === "vip" ? " selected" : "") + '>ВИП</option>';
                     html += '<option value="moder"' + (u.role === "moder" ? " selected" : "") + '>Модер</option>';
                     html += '<option value="admin"' + (u.role === "admin" ? " selected" : "") + '>Админ</option>';
+                    if (currentRole === "owner") {
+                        html += '<option value="coowner"' + (u.role === "coowner" ? " selected" : "") + '>Мл.Овнер</option>';
+                        html += '<option value="owner"' + (u.role === "owner" ? " selected" : "") + '>Owner</option>';
+                    }
                     html += '</select>';
-                    html += '<button class="btn" onclick="changeRole(\'' + esc(u.username) + '\')" style="font-size:10px;padding:2px 6px;">Роль</button> ';
+                    html += '<button class="btn" onclick="changeRole(\'' + safeUN + '\')" style="font-size:10px;padding:2px 6px;">Роль</button> ';
                 }
 
-                html += '<select id="dur-sel-' + esc(u.username) + '">';
+                html += '<select id="dur-sel-' + safeUN + '">';
                 html += '<option value="1800">30 мин</option>';
                 html += '<option value="3600">1 час</option>';
                 html += '<option value="7200">2 часа</option>';
                 html += '<option value="43200">12 часов</option>';
                 html += '<option value="86400">1 день</option>';
-                if (currentRole === "admin") {
+                if (currentRole === "admin" || currentRole === "owner" || currentRole === "coowner") {
                     html += '<option value="604800">7 дней</option>';
                     html += '<option value="2592000">30 дней</option>';
                     html += '<option value="99999999">Навсегда</option>';
@@ -1086,18 +1139,25 @@
                 html += '</select>';
 
                 if (!isBanned) {
-                    html += '<button class="btn btn-danger" onclick="doBan(\'' + esc(u.username) + '\')" style="font-size:10px;padding:2px 6px;">Бан</button>';
+                    html += '<button class="btn btn-danger" onclick="doBan(\'' + safeUN + '\')" style="font-size:10px;padding:2px 6px;">Бан</button>';
                 } else {
-                    html += '<button class="btn btn-success" onclick="doUnban(\'' + esc(u.username) + '\')" style="font-size:10px;padding:2px 6px;">Разбан</button>';
+                    html += '<button class="btn btn-success" onclick="doUnban(\'' + safeUN + '\')" style="font-size:10px;padding:2px 6px;">Разбан</button>';
                 }
                 if (!isMuted) {
-                    html += '<button class="btn btn-warn" onclick="doMute(\'' + esc(u.username) + '\')" style="font-size:10px;padding:2px 6px;">Мут</button>';
+                    html += '<button class="btn btn-warn" onclick="doMute(\'' + safeUN + '\')" style="font-size:10px;padding:2px 6px;">Мут</button>';
                 } else {
-                    html += '<button class="btn btn-success" onclick="doUnmute(\'' + esc(u.username) + '\')" style="font-size:10px;padding:2px 6px;">Размут</button>';
+                    html += '<button class="btn btn-success" onclick="doUnmute(\'' + safeUN + '\')" style="font-size:10px;padding:2px 6px;">Размут</button>';
                 }
                 html += '</div>';
             }
             list.innerHTML = html;
+        }
+
+        async function loadAdminUsers() {
+            const data = await api("GET", "/api/users");
+            if (data.error) { showStatus(data.error, "error"); document.getElementById("admin-users-list").innerHTML = '<div class="online-count" style="color:#c00;">Ошибка загрузки: ' + esc(data.error) + '</div>'; return; }
+            allAdminUsers = data.users || [];
+            filterAdminUsers();
         }
 
         async function changeRole(username) {
@@ -1112,7 +1172,14 @@
             const duration = document.getElementById("dur-sel-" + username).value;
             const data = await api("POST", "/api/admin/ban", { username, duration: parseInt(duration) });
             if (data.error) { showStatus(data.error, "error"); return; }
-            showStatus(username + " забанен!", "success");
+            // Снять роль модера/админа при бане (но не vip/owner/coowner)
+            const u = allAdminUsers.find(x => x.username === username);
+            if (u && (u.role === "moder" || u.role === "admin")) {
+                await api("POST", "/api/admin/role", { username, role: "player" });
+                showStatus(username + " забанен! Роль " + u.role + " снята.", "success");
+            } else {
+                showStatus(username + " забанен!", "success");
+            }
             loadAdminUsers();
         }
 
@@ -1134,6 +1201,36 @@
             await api("POST", "/api/admin/unmute", { username });
             showStatus(username + " размьючен!", "success");
             loadAdminUsers();
+        }
+
+        // ========== SEARCH ==========
+        async function doSearch() {
+            const q = document.getElementById("search-query").value.trim();
+            if (!q) { showStatus("Введи имя для поиска!", "error"); return; }
+            const data = await api("GET", "/api/users");
+            if (data.error) { showStatus(data.error, "error"); return; }
+            const results = (data.users || []).filter(u =>
+                u.username.toLowerCase().includes(q.toLowerCase()) ||
+                (u.nickname || "").toLowerCase().includes(q.toLowerCase())
+            );
+            const container = document.getElementById("search-results");
+            if (!results.length) {
+                container.innerHTML = '<div class="form-box"><p style="color:#888;text-align:center;">Игрок не найден</p></div>';
+                return;
+            }
+            let html = '<div class="section-header">&#128100; Результаты поиска (' + results.length + ')</div>';
+            for (const u of results) {
+                const now = Date.now() / 1000;
+                const isBanned = u.ban_until > now;
+                html += '<div class="admin-row" style="background:#fff;padding:8px 10px;border:1px solid #ccc;margin:4px 0;">';
+                html += avatarImg(u.avatar) + ' ';
+                html += '<a onclick="viewProfile(\'' + esc(u.username) + '\')" style="font-weight:bold;cursor:pointer;">' + esc(u.username) + '</a> ';
+                if (u.nickname && u.nickname !== u.username) html += '<span style="color:#666;">(' + esc(u.nickname) + ')</span> ';
+                html += roleBadge(u.role) + ' ';
+                if (isBanned) html += '<span class="ban-status ban-active">ЗАБАНЕН</span>';
+                html += '</div>';
+            }
+            container.innerHTML = html;
         }
 
         // ========== UTILS ==========
