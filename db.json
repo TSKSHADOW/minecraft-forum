@@ -1,0 +1,88 @@
+{
+  "users": {
+    "Admin": {
+      "password": "3b5312c40838c089d0d5788198ca34d26c830ea9e11e394111b489a99d1141bf",
+      "role": "admin",
+      "registered": 1771619464.6876895,
+      "nickname": "Admin",
+      "avatar": "",
+      "ban_until": 0,
+      "mute_until": 0
+    },
+    "111": {
+      "password": "0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c",
+      "role": "player",
+      "registered": 1771619656.8090265,
+      "nickname": "111",
+      "avatar": "uploads/avatar_111.png",
+      "ban_until": 0,
+      "mute_until": 0
+    },
+    "1111": {
+      "password": "0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c",
+      "role": "player",
+      "nickname": "1111",
+      "avatar": "",
+      "registered": 1771621398.30272,
+      "ban_until": 0,
+      "mute_until": 0
+    }
+  },
+  "posts": [
+    {
+      "id": "83d7ba90",
+      "author": "111",
+      "role": "player",
+      "nickname": "111",
+      "avatar": "",
+      "title": "44",
+      "content": "2",
+      "media": "",
+      "media_type": "",
+      "time": 1771620902.51327,
+      "replies": []
+    },
+    {
+      "id": "30a91e5a",
+      "author": "111",
+      "role": "player",
+      "title": "rfdr",
+      "content": "e",
+      "time": 1771619861.305589,
+      "replies": []
+    },
+    {
+      "id": "21a55933",
+      "author": "111",
+      "role": "player",
+      "title": "rfdr",
+      "content": "e",
+      "time": 1771619861.3045888,
+      "replies": []
+    },
+    {
+      "id": "26b6a38e",
+      "author": "111",
+      "role": "player",
+      "title": "rfdr",
+      "content": "e",
+      "time": 1771619861.303588,
+      "replies": []
+    },
+    {
+      "id": "78d97107",
+      "author": "Admin",
+      "role": "admin",
+      "title": "Привет это тест",
+      "content": "к",
+      "time": 1771619624.8635263,
+      "replies": []
+    }
+  ],
+  "sessions": {
+    "eba73337-0b99-41be-82e0-a7d4876ba1ac": "Admin",
+    "a1e7c014-4541-447d-a348-c57c1b9fb1b1": "111",
+    "714ce250-a970-415b-a1a0-bf58011a6471": "111",
+    "0e7c2493-3ebc-4aaa-a847-ac5f19340fd6": "1111"
+  }
+}
