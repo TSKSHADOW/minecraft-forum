@@ -8,7 +8,7 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
 
-        /* === THEME VARS: 2023 default === */
+        /* ===== THEME: Emerald (бывший 2023) ===== */
         :root {
             --accent:#22c55e; --accent-dark:#16a34a;
             --bg:#0f172a; --bg2:#1e293b; --bg3:#334155;
@@ -26,8 +26,8 @@
             --reply-form-bg:rgba(15,23,42,0.4);
         }
 
-        /* === THEME: 2016 === */
-        body.t2016 {
+        /* ===== THEME: Pixel (пиксельная классика из первого кода) ===== */
+        body.t-pixel {
             --accent:#5aad14; --accent-dark:#3a8c00;
             --bg:#557755; --bg2:#2d2d2d; --bg3:#555;
             --card:#f0f0e8; --border:#999;
@@ -42,21 +42,37 @@
             --post-header-bg:linear-gradient(180deg,#e8f5e0,#d0e8c0);
             --reply-bg:#f4f8f0;
             --reply-form-bg:#eef4e8;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAClJREFUKFNjZGBg+M9AAGACEiAuIyMjlEEMhUQrJkYzMS4gmgfRBAALggIBvDVNFQAAAABJRU5ErkJggg==') repeat;
+            background-size:64px 64px;
+            image-rendering:pixelated;
         }
-        body.t2016 .forum-header h1 {
-            font-family:Impact,"Arial Black",sans-serif;
+        body.t-pixel .forum-header h1 {
+            font-family:Impact,"Arial Black",sans-serif !important;
             font-size:36px; letter-spacing:4px;
-            text-shadow:3px 3px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;
+            text-shadow:3px 3px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000!important;
         }
-        body.t2016 input[type="text"],body.t2016 input[type="password"],body.t2016 textarea,body.t2016 select {
+        body.t-pixel input[type="text"],body.t-pixel input[type="password"],body.t-pixel textarea,body.t-pixel select {
             background:#fff; color:#111; border:2px inset #ccc;
         }
-        body.t2016 .modal-box { background:#f0f0e8; color:#111; }
-        body.t2016 .profile-card { background:#f8f8f0; }
-        body.t2016 .btn { border:2px outset #ccc; }
+        body.t-pixel .modal-box { background:#f0f0e8; color:#111; }
+        body.t-pixel .profile-card { background:#f8f8f0; }
+        body.t-pixel .btn { border:2px outset #ccc; }
+        body.t-pixel .card { background:var(--card); color:#111; }
+        body.t-pixel .card h2 { color:#2a5a2a; }
+        body.t-pixel .prof-card { background:#f0f0e8; }
+        body.t-pixel .sec-hdr { color:#fff; }
+        body.t-pixel a { color:#2a5a2a; }
+        body.t-pixel .post-body { color:#111; }
+        body.t-pixel .post-author-name { color:#2a5a2a; }
+        body.t-pixel .post-title { color:#2a5a2a; }
+        body.t-pixel .reply { background:#f4f8f0; color:#111; }
+        body.t-pixel .reply a { color:#2a5a2a; }
+        body.t-pixel .nav-links a { color:#ddd !important; }
+        body.t-pixel .status.ok { background:#ccffcc; color:#060; border-color:#9c9; }
+        body.t-pixel .status.err { background:#ffcccc; color:#600; border-color:#c99; }
 
-        /* === THEME: 2019 === */
-        body.t2019 {
+        /* ===== THEME: Ocean (бывший 2019) ===== */
+        body.t-ocean {
             --accent:#1abc9c; --accent-dark:#16a085;
             --bg:#1a1a2e; --bg2:#16213e; --bg3:#0f3460;
             --card:#16213e; --border:#0f3460;
@@ -73,8 +89,13 @@
             --reply-form-bg:rgba(0,0,0,0.15);
         }
 
-        /* === THEME: 2025 === */
-        body.t2025 {
+        /* ===== THEME: Emerald (уже в :root, просто добавляем класс) ===== */
+        body.t-emerald {
+            /* same as :root — default */
+        }
+
+        /* ===== THEME: Void (новая, бывший 2025 + эффекты) ===== */
+        body.t-void {
             --accent:#818cf8; --accent-dark:#6366f1;
             --bg:#09090b; --bg2:#18181b; --bg3:#27272a;
             --card:#18181b; --border:#3f3f46;
@@ -90,12 +111,180 @@
             --reply-bg:rgba(0,0,0,0.2);
             --reply-form-bg:rgba(0,0,0,0.15);
         }
-        body.t2025 .role-owner {
+        body.t-void .rb-owner {
             background:linear-gradient(90deg,#6366f1,#818cf8,#6366f1);
             color:#fff; border-color:#4f46e5;
         }
 
-        /* === BASE === */
+        /* ===== EMERALD EFFECTS ===== */
+        body:not([class]), body.t-emerald {
+            position:relative;
+        }
+        /* Animated particle stars for Emerald */
+        body:not([class])::before, body.t-emerald::before {
+            content:'';
+            position:fixed; inset:0; pointer-events:none; z-index:0;
+            background:
+                radial-gradient(1px 1px at 10% 15%, rgba(34,197,94,0.6) 0%, transparent 100%),
+                radial-gradient(1px 1px at 30% 70%, rgba(34,197,94,0.4) 0%, transparent 100%),
+                radial-gradient(1px 1px at 50% 25%, rgba(74,222,128,0.5) 0%, transparent 100%),
+                radial-gradient(1px 1px at 70% 85%, rgba(34,197,94,0.6) 0%, transparent 100%),
+                radial-gradient(1px 1px at 85% 40%, rgba(74,222,128,0.4) 0%, transparent 100%),
+                radial-gradient(2px 2px at 20% 90%, rgba(34,197,94,0.3) 0%, transparent 100%),
+                radial-gradient(2px 2px at 60% 10%, rgba(74,222,128,0.5) 0%, transparent 100%),
+                radial-gradient(1px 1px at 90% 60%, rgba(34,197,94,0.4) 0%, transparent 100%);
+            animation: emeraldFloat 8s ease-in-out infinite alternate;
+        }
+        @keyframes emeraldFloat {
+            0% { opacity:0.4; transform:translateY(0px); }
+            100% { opacity:1; transform:translateY(-8px); }
+        }
+
+        /* Glow on post hover for Emerald */
+        body:not([class]) .post:hover, body.t-emerald .post:hover {
+            box-shadow:0 0 20px rgba(34,197,94,0.2), 0 4px 20px rgba(0,0,0,0.4);
+            border-color:rgba(34,197,94,0.4);
+            transform:translateY(-1px);
+            transition:all 0.2s ease;
+        }
+        body:not([class]) .post, body.t-emerald .post {
+            transition:all 0.2s ease;
+        }
+
+        /* Animated border for header Emerald */
+        body:not([class]) .forum-header, body.t-emerald .forum-header {
+            position:relative;
+            overflow:hidden;
+        }
+        body:not([class]) .forum-header::after, body.t-emerald .forum-header::after {
+            content:'';
+            position:absolute;
+            bottom:0; left:-100%;
+            width:100%; height:2px;
+            background:linear-gradient(90deg, transparent, #22c55e, #4ade80, #22c55e, transparent);
+            animation:scanline 3s linear infinite;
+        }
+        @keyframes scanline {
+            0% { left:-100%; }
+            100% { left:100%; }
+        }
+
+        /* ===== VOID EFFECTS ===== */
+        body.t-void {
+            position:relative;
+        }
+        body.t-void::before {
+            content:'';
+            position:fixed; inset:0; pointer-events:none; z-index:0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(99,102,241,0.05) 0%, transparent 50%);
+            animation:voidPulse 6s ease-in-out infinite alternate;
+        }
+        @keyframes voidPulse {
+            0% { opacity:0.5; }
+            100% { opacity:1; }
+        }
+        body.t-void::after {
+            content:'';
+            position:fixed; inset:0; pointer-events:none; z-index:0;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            background-size:200px 200px;
+            opacity:0.4;
+        }
+
+        /* Void post hover — neon glow */
+        body.t-void .post {
+            transition:all 0.25s ease;
+            position:relative;
+        }
+        body.t-void .post:hover {
+            box-shadow:0 0 30px rgba(99,102,241,0.3), 0 0 60px rgba(99,102,241,0.1), inset 0 0 30px rgba(99,102,241,0.02);
+            border-color:rgba(129,140,248,0.5);
+            transform:translateY(-2px);
+        }
+
+        /* Void header animated gradient */
+        body.t-void .forum-header {
+            position:relative;
+            overflow:hidden;
+        }
+        body.t-void .forum-header h1 {
+            background:linear-gradient(135deg, #818cf8, #c084fc, #818cf8, #6366f1);
+            background-size:300% 300%;
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
+            animation:voidTitle 4s ease-in-out infinite;
+        }
+        @keyframes voidTitle {
+            0%,100% { background-position:0% 50%; }
+            50% { background-position:100% 50%; }
+        }
+
+        /* Void nav link hover */
+        body.t-void .nav-links a:hover {
+            color:#818cf8 !important;
+            text-shadow:0 0 12px rgba(129,140,248,0.8);
+        }
+
+        /* Void btn glow */
+        body.t-void .btn-green:hover {
+            box-shadow:0 0 16px rgba(99,102,241,0.6);
+        }
+
+        /* ===== PIXEL EFFECTS ===== */
+        body.t-pixel .forum-header::after {
+            content:'';
+            position:absolute;
+            top:0; left:0; right:0; bottom:0;
+            background:repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.03) 3px,
+                rgba(0,0,0,0.03) 4px
+            );
+            pointer-events:none;
+        }
+        body.t-pixel .post:hover {
+            box-shadow:4px 4px 0 #5aad14;
+            transform:translate(-2px,-2px);
+            transition:all 0.1s steps(2);
+        }
+        body.t-pixel .post {
+            transition:all 0.1s steps(2);
+        }
+        body.t-pixel .btn:hover {
+            box-shadow:2px 2px 0 #3a8c00;
+        }
+
+        /* ===== OCEAN EFFECTS ===== */
+        body.t-ocean .forum-header {
+            position:relative; overflow:hidden;
+        }
+        body.t-ocean .forum-header::before {
+            content:'';
+            position:absolute; bottom:0; left:0; right:0; height:3px;
+            background:linear-gradient(90deg, #1abc9c, #3498db, #1abc9c, #16a085);
+            background-size:200% 100%;
+            animation:oceanWave 3s linear infinite;
+        }
+        @keyframes oceanWave {
+            0% { background-position:0% 0%; }
+            100% { background-position:200% 0%; }
+        }
+        body.t-ocean .post:hover {
+            box-shadow:0 4px 20px rgba(26,188,156,0.25);
+            border-color:rgba(26,188,156,0.4);
+            transform:translateY(-1px);
+            transition:all 0.2s ease;
+        }
+        body.t-ocean .post { transition:all 0.2s ease; }
+
+
+        /* ===== BASE ===== */
         body {
             background:var(--bg); font-family:var(--font);
             font-size:13px; color:var(--text); min-height:100vh;
@@ -107,10 +296,11 @@
             background:var(--header-bg);
             border-bottom:2px solid var(--header-border);
             padding:16px 0 12px; text-align:center;
+            position:relative;
         }
-        .forum-header h1 { font-size:32px; font-weight:800; color:#fff; letter-spacing:2px; }
+        .forum-header h1 { font-size:32px; font-weight:800; color:#fff; letter-spacing:2px; position:relative; z-index:1; }
         .forum-header h1 span { color:var(--accent); }
-        .forum-header .sub { font-size:11px; color:var(--text2); margin-top:4px; font-family:'JetBrains Mono',monospace; letter-spacing:3px; }
+        .forum-header .sub { font-size:11px; color:var(--text2); margin-top:4px; font-family:'JetBrains Mono',monospace; letter-spacing:3px; position:relative; z-index:1; }
 
         .navbar {
             background:var(--nav-bg); border-bottom:1px solid var(--border);
@@ -126,7 +316,7 @@
         .user-info { color:var(--accent); font-weight:700; font-size:12px; }
         #nav-logout { color:var(--red) !important; font-size:12px; }
 
-        .wrapper { max-width:900px; margin:16px auto; padding:0 12px; }
+        .wrapper { max-width:900px; margin:16px auto; padding:0 12px; position:relative; z-index:1; }
 
         .sec-hdr {
             background:var(--section-bg); color:#fff;
@@ -158,7 +348,6 @@
         select { padding:5px 8px; cursor:pointer; }
         input[type="file"] { color:var(--text2); font-size:11px; }
 
-        /* BUTTONS - clean, no emoji */
         .btn {
             font-family:var(--font); font-size:12px; padding:6px 16px;
             cursor:pointer; border-radius:var(--btn-radius); border:none;
@@ -172,7 +361,6 @@
         .btn-yellow { background:var(--yellow); color:#111; }
         .btn-teal { background:var(--accent-dark); color:#fff; }
 
-        /* ROLE BADGES */
         .rb { font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; display:inline-block; margin-left:4px; }
         .rb-player { color:#94a3b8; background:rgba(148,163,184,.12); border:1px solid #475569; }
         .rb-vip { color:var(--gold); background:rgba(251,191,36,.12); border:1px solid #92400e; }
@@ -181,7 +369,6 @@
         .rb-coowner { color:#c084fc; background:rgba(192,132,252,.12); border:1px solid #7e22ce; }
         .rb-owner { color:#1a0a00; background:linear-gradient(90deg,#fbbf24,#f59e0b,#fbbf24); border:1px solid #b45309; box-shadow:0 0 6px #fbbf2444; }
 
-        /* POSTS */
         .post { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin:8px 0; overflow:hidden; }
         .post-hdr { background:var(--post-header-bg); padding:8px 12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
         .post-title { font-weight:800; font-size:13px; color:var(--accent); }
@@ -202,7 +389,6 @@
         .reply-form { padding:6px 12px; background:var(--reply-form-bg); display:flex; gap:6px; }
         .reply-form input { flex:1; }
 
-        /* TABS */
         .tabs { display:flex; gap:4px; margin-top:12px; }
         .tab { background:var(--bg2); border:1px solid var(--border); border-bottom:none; border-radius:var(--radius) var(--radius) 0 0; padding:7px 18px; font-size:12px; font-weight:700; cursor:pointer; color:var(--text2); font-family:var(--font); transition:all .15s; }
         .tab:hover { color:var(--accent); }
@@ -210,30 +396,52 @@
         .panel { display:none; }
         .panel.on { display:block; }
 
-        /* SETTINGS THEMES */
+        /* ===== SETTINGS THEMES ===== */
         .theme-grid { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
         .tc {
             border:2px solid var(--border); border-radius:var(--radius);
             padding:14px 22px; cursor:pointer; text-align:center;
-            transition:all .2s; min-width:110px;
+            transition:all .2s; min-width:120px; position:relative; overflow:hidden;
         }
-        .tc:hover { border-color:var(--accent); }
+        .tc:hover { border-color:var(--accent); transform:translateY(-2px); }
         .tc.on { border-color:var(--accent); background:rgba(255,255,255,.06); }
-        .tc .yr { font-size:22px; font-weight:800; display:block; margin-bottom:4px; }
+        .tc .yr { font-size:20px; font-weight:800; display:block; margin-bottom:4px; }
         .tc .ds { font-size:10px; color:var(--text2); font-weight:400; }
-        .tc-2016 .yr { color:#5aad14; }
-        .tc-2019 .yr { color:#1abc9c; }
-        .tc-2023 .yr { color:#22c55e; }
-        .tc-2025 .yr { color:#818cf8; }
 
-        /* ADMIN */
+        /* Pixel theme card */
+        .tc-pixel { border-color:#5aad14; background:rgba(90,173,20,0.08); }
+        .tc-pixel .yr { color:#5aad14; font-family:Impact,monospace; letter-spacing:2px; }
+        .tc-pixel::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(90,173,20,0.04) 3px,rgba(90,173,20,0.04) 4px); pointer-events:none; }
+
+        /* Ocean theme card */
+        .tc-ocean .yr { color:#1abc9c; }
+
+        /* Emerald theme card */
+        .tc-emerald .yr {
+            color:#22c55e;
+            text-shadow:0 0 12px rgba(34,197,94,0.6);
+        }
+        .tc-emerald::before { content:''; position:absolute; bottom:0; left:-100%; width:100%; height:2px; background:linear-gradient(90deg,transparent,#22c55e,transparent); animation:scanline 2.5s linear infinite; }
+
+        /* Void theme card */
+        .tc-void .yr {
+            background:linear-gradient(135deg,#818cf8,#c084fc,#818cf8);
+            background-size:200% 200%;
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
+            animation:voidTitle 3s ease-in-out infinite;
+        }
+        .tc-void { border-color:#6366f1; background:rgba(99,102,241,0.06); }
+        .tc-void::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%, rgba(99,102,241,0.12) 0%, transparent 70%); pointer-events:none; animation:voidPulse 3s ease-in-out infinite alternate; }
+
+        /* ===== ADMIN ===== */
         .adm-row { display:flex; align-items:center; gap:6px; padding:7px 0; border-bottom:1px solid var(--border); flex-wrap:wrap; }
         .adm-row:last-child { border-bottom:none; }
         .bs { font-size:10px; padding:2px 6px; border-radius:4px; font-weight:700; }
         .bs-ban { background:rgba(239,68,68,.2); color:#f87171; border:1px solid #991b1b; }
         .bs-mute { background:rgba(245,158,11,.2); color:#fbbf24; border:1px solid #92400e; }
 
-        /* PROFILE */
         .prof-card { background:var(--card); border:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius); padding:16px; display:flex; gap:20px; align-items:flex-start; }
         .prof-info { flex:1; }
         .prof-info p { margin:5px 0; font-size:12px; color:var(--text2); }
@@ -241,19 +449,16 @@
         .danger { border:1px solid #7f1d1d; background:rgba(239,68,68,.05); border-radius:var(--radius); padding:14px; margin:8px 0; }
         .danger h2 { color:#f87171 !important; border-color:#7f1d1d !important; }
 
-        /* STATUS */
         .status { padding:8px 14px; font-size:12px; margin:8px 0; display:none; border-radius:var(--radius); font-weight:700; }
         .status.err { background:rgba(239,68,68,.15); color:#f87171; border:1px solid #991b1b; }
         .status.ok { background:rgba(34,197,94,.15); color:#4ade80; border:1px solid #166534; }
         .status.show { display:block; }
         .empty { font-size:12px; color:var(--text2); text-align:center; padding:12px; }
 
-        /* LIGHTBOX */
         .lbx { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:999; align-items:center; justify-content:center; cursor:pointer; }
         .lbx.on { display:flex; }
         .lbx img { max-width:90vw; max-height:90vh; border-radius:var(--radius); }
 
-        /* MODAL */
         .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:998; align-items:center; justify-content:center; }
         .modal.on { display:flex; }
         .modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:calc(var(--radius) + 2px); padding:24px; max-width:360px; width:90%; text-align:center; }
@@ -261,8 +466,7 @@
         .modal-box p { font-size:12px; color:var(--text2); margin-bottom:16px; }
         .modal-btns { display:flex; gap:10px; justify-content:center; }
 
-        /* FOOTER */
-        .footer { background:var(--bg2); color:var(--text2); text-align:center; padding:10px; font-size:11px; border-top:1px solid var(--border); margin-top:20px; }
+        .footer { background:var(--bg2); color:var(--text2); text-align:center; padding:10px; font-size:11px; border-top:1px solid var(--border); margin-top:20px; position:relative; z-index:1; }
         .footer span { color:var(--accent); }
     </style>
 </head>
@@ -284,7 +488,7 @@
     </div>
     <div class="nav-right">
         <span id="nav-info" class="user-info" style="display:none"></span>
-        <a onclick="doLogout()" id="nav-logout" style="display:none;color:var(--red)">[Выход]</a>
+        <a onclick="doLogout()" id="nav-logout" style="display:none">[Выход]</a>
     </div>
 </div>
 
@@ -423,23 +627,23 @@
         <div class="sec-hdr">Настройки</div>
         <div class="card">
             <h2>Тема оформления</h2>
-            <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Каждая тема воссоздаёт эстетику форумов своего времени.</p>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Каждая тема — своя атмосфера и уникальный стиль.</p>
             <div class="theme-grid">
-                <div class="tc tc-2016" id="tc-2016" onclick="applyTheme('2016')">
-                    <span class="yr">2016</span>
-                    <span class="ds">Классика / Пиксель</span>
+                <div class="tc tc-pixel" id="tc-pixel" onclick="applyTheme('pixel')">
+                    <span class="yr">PIXEL</span>
+                    <span class="ds">Пиксель / Классика</span>
                 </div>
-                <div class="tc tc-2019" id="tc-2019" onclick="applyTheme('2019')">
-                    <span class="yr">2019</span>
-                    <span class="ds">Тёмный / Бирюзовый</span>
+                <div class="tc tc-ocean" id="tc-ocean" onclick="applyTheme('ocean')">
+                    <span class="yr">OCEAN</span>
+                    <span class="ds">Тёмный / Бирюза</span>
                 </div>
-                <div class="tc tc-2023 on" id="tc-2023" onclick="applyTheme('2023')">
-                    <span class="yr">2023</span>
-                    <span class="ds">Тёмный / Зелёный</span>
+                <div class="tc tc-emerald on" id="tc-emerald" onclick="applyTheme('emerald')">
+                    <span class="yr">EMERALD</span>
+                    <span class="ds">Зелёное свечение ✦</span>
                 </div>
-                <div class="tc tc-2025" id="tc-2025" onclick="applyTheme('2025')">
-                    <span class="yr">2025</span>
-                    <span class="ds">Минимал / Фиолетовый</span>
+                <div class="tc tc-void" id="tc-void" onclick="applyTheme('void')">
+                    <span class="yr">VOID</span>
+                    <span class="ds">Фиолетовый туман ✦</span>
                 </div>
             </div>
         </div>
@@ -492,15 +696,19 @@
     const OWNERS = ["Admin","k1prs"];
 
     // ===== THEME =====
+    const THEME_MAP = { pixel:"t-pixel", ocean:"t-ocean", emerald:"t-emerald", void:"t-void" };
     function applyTheme(y) {
-        document.body.className = y === "2023" ? "" : "t"+y;
+        // Remove all theme classes
+        document.body.className = THEME_MAP[y] || "";
+        // Special: emerald is default (no class)
+        if (y === "emerald") document.body.className = "";
         localStorage.setItem("mcw-theme", y);
-        ["2016","2019","2023","2025"].forEach(t => {
+        ["pixel","ocean","emerald","void"].forEach(t => {
             const el = document.getElementById("tc-"+t);
             if (el) el.classList.toggle("on", t === y);
         });
     }
-    function loadTheme() { applyTheme(localStorage.getItem("mcw-theme") || "2023"); }
+    function loadTheme() { applyTheme(localStorage.getItem("mcw-theme") || "emerald"); }
 
     // ===== API =====
     async function api(m, u, b) {
@@ -754,7 +962,6 @@
             if (banned) h += '<span class="bs bs-ban">ЗАБАНЕН</span> ';
             if (muted)  h += '<span class="bs bs-mute">ЗАМЬЮЧЕН</span> ';
 
-            // coowner и owner могут менять роли до своего уровня
             const canRole = ["owner","coowner","admin"].includes(CR);
             if (canRole) {
                 h += '<select id="rs-'+su+'">';
