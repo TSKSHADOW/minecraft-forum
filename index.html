@@ -1,582 +1,335 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCWorld Forum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green: #22c55e;
+            --green-dark: #16a34a;
+            --green-light: #dcfce7;
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #334155;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --text2: #94a3b8;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --purple: #a855f7;
+            --gold: #fbbf24;
         }
 
         body {
-            background: url('grass.jpg') repeat;
-            background-size: 64px 64px;
-            image-rendering: pixelated;
-            font-family: Verdana, Arial, sans-serif;
-            font-size: 11px;
-            color: #000;
+            background: var(--bg);
+            font-family: 'Nunito', sans-serif;
+            font-size: 13px;
+            color: var(--text);
             min-height: 100vh;
         }
 
-        a {
-            color: #006699;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
+        a { color: var(--green); text-decoration: none; cursor: pointer; }
+        a:hover { text-decoration: underline; }
 
         /* HEADER */
         .forum-header {
-            background: linear-gradient(180deg, #1a7a1a 0%, #0d4d0d 100%);
-            border-bottom: 4px solid #5aad14;
-            padding: 10px 0 8px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a1e 50%, #0f172a 100%);
+            border-bottom: 2px solid var(--green);
+            padding: 16px 0 12px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
         }
-
-        .forum-header::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: repeating-linear-gradient(90deg, #5aad14 0px, #5aad14 8px, #3a8c00 8px, #3a8c00 16px);
-        }
-
         .forum-header h1 {
-            font-family: "Impact", "Arial Black", Verdana, sans-serif;
-            font-size: 36px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
             color: #fff;
-            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-
-        .forum-header h1 span {
-            color: #7dde2f;
-        }
-
-        .forum-header .subtitle {
-            font-size: 10px;
-            color: #aaffaa;
-            margin-top: 3px;
             letter-spacing: 2px;
-            font-family: "Courier New", monospace;
+        }
+        .forum-header h1 span { color: var(--green); }
+        .forum-header .subtitle {
+            font-size: 11px;
+            color: var(--text2);
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 3px;
         }
 
         /* NAVBAR */
         .navbar {
-            background: linear-gradient(180deg, #2d2d2d, #1a1a1a);
-            border-bottom: 2px solid #5aad14;
-            padding: 0 12px;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-
-        .navbar a,
-        .navbar span {
-            color: #ddd;
-            font-size: 11px;
-            margin-right: 2px;
-            cursor: pointer;
-        }
-
-        .navbar a:hover {
-            color: #7dde2f;
-            text-decoration: none;
-        }
-
-        .navbar .user-info {
-            color: #7dde2f;
-            font-weight: bold;
-        }
-
         .nav-links a {
-            padding: 6px 12px;
-            color: #ccc !important;
+            padding: 10px 14px;
+            color: var(--text2) !important;
             display: inline-block;
-            margin: 0;
-            font-size: 11px;
-            font-weight: bold;
-            border-right: 1px solid #333;
-            transition: background 0.1s;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.15s;
         }
-
         .nav-links a:hover {
-            background: #3a3a3a;
-            color: #7dde2f !important;
+            color: var(--green) !important;
             text-decoration: none;
+            background: rgba(34,197,94,0.08);
         }
+        .navbar .user-info { color: var(--green); font-weight: 700; font-size: 12px; }
+        .navbar a:hover { color: var(--green); text-decoration: none; }
+        #nav-logout { color: var(--red) !important; font-size: 12px; padding: 8px 0 8px 12px; }
 
-        .wrapper {
-            max-width: 900px;
-            margin: 10px auto;
-            padding: 0 8px;
-        }
+        .wrapper { max-width: 900px; margin: 16px auto; padding: 0 12px; }
 
         /* SECTION HEADER */
         .section-header {
-            background: linear-gradient(180deg, #3a8c14, #1e5a00);
+            background: linear-gradient(90deg, var(--green-dark), #15803d);
             color: #fff;
-            padding: 6px 10px;
-            font-weight: bold;
-            font-size: 12px;
-            border: 1px solid #2a6600;
-            text-shadow: 1px 1px 0 #000;
-            margin-top: 8px;
-            letter-spacing: 1px;
-        }
-
-        /* FORMS */
-        .form-box {
-            background: #f0f0e8;
-            border: 2px solid #888;
-            border-top: 3px solid #5aad14;
-            padding: 15px;
-            margin: 10px 0;
-        }
-
-        .form-box h2 {
+            padding: 8px 14px;
+            font-weight: 800;
             font-size: 13px;
-            color: #1a5a00;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #bbb;
-            padding-bottom: 4px;
-            font-family: "Impact", Verdana, sans-serif;
-            letter-spacing: 1px;
+            border-radius: 8px 8px 0 0;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
         }
 
-        .form-row {
-            margin: 6px 0;
+        /* CARDS / FORMS */
+        .form-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0 0 8px 8px;
+            padding: 16px;
+            margin: 0 0 12px 0;
         }
+        .form-box.standalone {
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        .form-box h2 {
+            font-size: 14px;
+            color: var(--green);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+            font-weight: 800;
+        }
+        .form-row { margin: 8px 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .form-row label { font-weight: 700; font-size: 12px; color: var(--text2); min-width: 110px; }
 
-        .form-row label {
-            display: inline-block;
-            width: 150px;
-            font-weight: bold;
-            font-size: 11px;
-            vertical-align: top;
+        input[type="text"], input[type="password"], textarea, select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 12px;
+            color: var(--text);
+            outline: none;
+            transition: border 0.15s;
         }
-
-        .form-row input[type="text"],
-        .form-row input[type="password"],
-        .form-row input[type="file"],
-        .form-row textarea,
-        .form-row select {
-            border: 2px inset #ccc;
-            padding: 3px 5px;
-            font-family: Verdana, Arial, sans-serif;
-            font-size: 11px;
-            background: #fff;
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+            border-color: var(--green);
         }
-
-        .form-row input[type="text"],
-        .form-row input[type="password"] {
-            width: 200px;
-        }
-
-        .form-row textarea {
-            width: 100%;
-            height: 80px;
-            resize: vertical;
-        }
-
-        .form-row select {
-            padding: 2px;
-        }
+        input[type="text"], input[type="password"] { width: 200px; }
+        textarea { width: 100%; height: 80px; resize: vertical; }
+        select { padding: 5px 8px; cursor: pointer; }
+        input[type="file"] { color: var(--text2); font-size: 11px; }
 
         /* BUTTONS */
         .btn {
-            font-family: Verdana, Arial, sans-serif;
-            font-size: 11px;
-            padding: 4px 14px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 12px;
+            padding: 6px 16px;
             cursor: pointer;
-            border: 2px outset #ccc;
-            background: linear-gradient(180deg, #f0f0f0, #d0d0d0);
-            color: #333;
-            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            font-weight: 700;
+            transition: all 0.15s;
+            background: var(--bg3);
+            color: var(--text);
         }
-
-        .btn:hover {
-            background: linear-gradient(180deg, #e0e8e0, #c0d0c0);
-        }
-
-        .btn:active {
-            border-style: inset;
-        }
-
-        .btn-primary {
-            background: linear-gradient(180deg, #5aad14, #3a8c00);
-            color: #fff;
-            border-color: #2a6600;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(180deg, #6dcc1a, #4aaa00);
-        }
-
-        .btn-danger {
-            background: linear-gradient(180deg, #cc5555, #993333);
-            color: #fff;
-            border-color: #772222;
-        }
-
-        .btn-danger:hover {
-            background: linear-gradient(180deg, #dd6666, #aa4444);
-        }
-
-        .btn-warn {
-            background: linear-gradient(180deg, #cc9933, #996622);
-            color: #fff;
-            border-color: #774411;
-        }
-
-        .btn-warn:hover {
-            background: linear-gradient(180deg, #ddaa44, #aa7733);
-        }
-
-        .btn-success {
-            background: linear-gradient(180deg, #55aa55, #338833);
-            color: #fff;
-            border-color: #226622;
-        }
+        .btn:hover { filter: brightness(1.15); }
+        .btn-primary { background: var(--green); color: #fff; }
+        .btn-danger { background: var(--red); color: #fff; }
+        .btn-warn { background: var(--yellow); color: #1a1a1a; }
+        .btn-success { background: #16a34a; color: #fff; }
+        .btn-purple { background: var(--purple); color: #fff; }
 
         /* ROLE BADGES */
         .role-badge {
-            font-size: 9px;
-            font-weight: bold;
-            padding: 1px 5px;
-            border: 1px solid;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
             display: inline-block;
             margin-left: 4px;
         }
-
-        .role-player {
-            color: #555;
-            background: #e0e0e0;
-            border-color: #999;
-        }
-
-        .role-vip {
-            color: #b8860b;
-            background: #fff8dc;
-            border-color: #daa520;
-        }
-
-        .role-moder {
-            color: #006600;
-            background: #d0ffd0;
-            border-color: #090;
-        }
-
-        .role-admin {
-            color: #cc0000;
-            background: #ffd0d0;
-            border-color: #c00;
-        }
-
-        .role-coowner {
-            color: #7700cc;
-            background: #f0d0ff;
-            border-color: #9900ee;
-        }
-
+        .role-player { color: #94a3b8; background: rgba(148,163,184,0.12); border: 1px solid #475569; }
+        .role-vip { color: var(--gold); background: rgba(251,191,36,0.12); border: 1px solid #92400e; }
+        .role-moder { color: #4ade80; background: rgba(74,222,128,0.12); border: 1px solid #166534; }
+        .role-admin { color: #f87171; background: rgba(248,113,113,0.12); border: 1px solid #991b1b; }
+        .role-coowner { color: #c084fc; background: rgba(192,132,252,0.12); border: 1px solid #7e22ce; }
         .role-owner {
-            color: #5a3000;
-            background: linear-gradient(90deg, #ffe066, #ffd700, #ffe066);
-            border-color: #b8860b;
-            text-shadow: 0 1px 0 #fff8;
-            box-shadow: 0 0 4px #ffd70055;
+            color: #1a0a00;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+            border: 1px solid #b45309;
+            text-shadow: none;
+            box-shadow: 0 0 6px #fbbf2444;
         }
 
         /* POSTS */
         .post-item {
-            background: #fff;
-            border: 1px solid #999;
-            border-top: 2px solid #5aad14;
-            margin: 6px 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 8px 0;
+            overflow: hidden;
         }
-
         .post-header {
-            background: linear-gradient(180deg, #e8f5e0, #d0e8c0);
-            padding: 5px 8px;
-            border-bottom: 1px solid #aac099;
+            background: rgba(34,197,94,0.06);
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        .post-header .post-title { font-weight: 800; font-size: 13px; color: var(--green); }
+        .post-header .post-meta { font-size: 10px; color: var(--text2); }
+        .post-body { padding: 10px 12px; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+        .post-author { display: flex; gap: 8px; align-items: center; }
+        .post-author-name { font-weight: 700; color: var(--text); }
+        .post-media { padding: 6px 12px; }
+        .post-media img { max-width: 400px; max-height: 300px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
+        .post-media video { max-width: 400px; max-height: 300px; border-radius: 6px; border: 1px solid var(--border); }
 
-        .post-header .post-title {
-            font-weight: bold;
-            font-size: 12px;
-            color: #1a5a00;
-        }
-
-        .post-header .post-meta {
-            font-size: 10px;
-            color: #666;
-        }
-
-        .post-body {
-            padding: 8px 10px;
-            font-size: 11px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        .post-author {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .post-author-name {
-            font-weight: bold;
-            color: #1a5a00;
-        }
-
-        .post-media {
-            padding: 5px 10px;
-        }
-
-        .post-media img {
-            max-width: 400px;
-            max-height: 300px;
-            border: 1px solid #999;
-            cursor: pointer;
-        }
-
-        .post-media video {
-            max-width: 400px;
-            max-height: 300px;
-            border: 1px solid #999;
-        }
-
-        .avatar-small {
-            width: 24px;
-            height: 24px;
-            border-radius: 2px;
-            border: 1px solid #888;
-            object-fit: cover;
-            vertical-align: middle;
-        }
-
-        .avatar-big {
-            width: 80px;
-            height: 80px;
-            border-radius: 4px;
-            border: 2px solid #888;
-            object-fit: cover;
-        }
+        .avatar-small { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--border); object-fit: cover; vertical-align: middle; }
+        .avatar-big { width: 80px; height: 80px; border-radius: 8px; border: 2px solid var(--border); object-fit: cover; }
 
         /* REPLIES */
-        .replies {
-            border-top: 1px dashed #bbb;
-        }
-
+        .replies { border-top: 1px solid var(--border); }
         .reply-item {
-            padding: 5px 10px 5px 25px;
-            border-bottom: 1px dotted #ddd;
-            background: #f4f8f0;
-            font-size: 11px;
+            padding: 6px 12px 6px 28px;
+            border-bottom: 1px solid rgba(51,65,85,0.5);
+            background: rgba(15,23,42,0.5);
+            font-size: 12px;
         }
-
-        .reply-item:last-child {
-            border-bottom: none;
-        }
-
-        .reply-form {
-            padding: 5px 10px;
-            background: #eef4e8;
-            display: flex;
-            gap: 5px;
-        }
-
-        .reply-form input {
-            flex: 1;
-            border: 2px inset #ccc;
-            padding: 3px 5px;
-            font-size: 11px;
-            font-family: Verdana, sans-serif;
-        }
+        .reply-item:last-child { border-bottom: none; }
+        .reply-form { padding: 6px 12px; background: rgba(15,23,42,0.4); display: flex; gap: 6px; }
+        .reply-form input { flex: 1; }
 
         /* ADMIN */
         .admin-row {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 5px 0;
-            border-bottom: 1px dotted #ccc;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
         }
-
-        .admin-row select {
-            font-size: 11px;
-            border: 2px inset #ccc;
-            padding: 2px;
-        }
-
-        .ban-status {
-            font-size: 9px;
-            padding: 1px 4px;
-            border-radius: 2px;
-        }
-
-        .ban-active {
-            background: #fcc;
-            color: #900;
-            border: 1px solid #c66;
-        }
-
-        .mute-active {
-            background: #ffc;
-            color: #960;
-            border: 1px solid #cc6;
-        }
+        .admin-row:last-child { border-bottom: none; }
+        .ban-status { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+        .ban-active { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid #991b1b; }
+        .mute-active { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid #92400e; }
 
         /* TABS */
-        .tabs {
-            display: flex;
-            gap: 2px;
-            margin-top: 8px;
-        }
-
+        .tabs { display: flex; gap: 4px; margin-top: 12px; }
         .tab {
-            background: linear-gradient(180deg, #d0d0d0, #b0b0b0);
-            border: 1px solid #999;
+            background: var(--bg2);
+            border: 1px solid var(--border);
             border-bottom: none;
-            padding: 4px 14px;
-            font-size: 11px;
-            font-weight: bold;
+            border-radius: 6px 6px 0 0;
+            padding: 7px 18px;
+            font-size: 12px;
+            font-weight: 700;
             cursor: pointer;
-            color: #444;
-            font-family: Verdana, sans-serif;
+            color: var(--text2);
+            font-family: 'Nunito', sans-serif;
+            transition: all 0.15s;
         }
-
-        .tab:hover {
-            background: linear-gradient(180deg, #ddeedd, #bbddbb);
-        }
-
-        .tab.active {
-            background: linear-gradient(180deg, #fff, #eee);
-            color: #1a5a00;
-            border-bottom: 1px solid #eee;
-        }
-
-        .panel {
-            display: none;
-            background: #eee;
-            border: 1px solid #999;
-            padding: 10px;
-        }
-
-        .panel.active {
-            display: block;
-        }
+        .tab:hover { color: var(--green); background: rgba(34,197,94,0.08); }
+        .tab.active { background: var(--card); color: var(--green); border-color: var(--border); }
+        .panel { display: none; }
+        .panel.active { display: block; }
 
         /* FOOTER */
         .forum-footer {
-            background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
-            color: #666;
+            background: var(--bg2);
+            color: var(--text2);
             text-align: center;
-            padding: 6px;
-            font-size: 10px;
-            border-top: 3px solid #5aad14;
-            margin-top: 15px;
+            padding: 10px;
+            font-size: 11px;
+            border-top: 1px solid var(--border);
+            margin-top: 20px;
         }
-
-        .forum-footer span {
-            color: #7dde2f;
-        }
+        .forum-footer span { color: var(--green); }
 
         /* STATUS */
         .status-bar {
-            background: #ffffcc;
-            border: 1px solid #cc9;
-            padding: 5px 10px;
-            font-size: 11px;
-            color: #660;
-            margin: 6px 0;
+            padding: 8px 14px;
+            font-size: 12px;
+            margin: 8px 0;
             display: none;
+            border-radius: 6px;
+            font-weight: 700;
         }
+        .status-bar.error { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid #991b1b; }
+        .status-bar.success { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid #166534; }
+        .status-bar.visible { display: block; }
 
-        .status-bar.error {
-            background: #ffcccc;
-            border-color: #c99;
-            color: #600;
-        }
-
-        .status-bar.success {
-            background: #ccffcc;
-            border-color: #9c9;
-            color: #060;
-        }
-
-        .status-bar.visible {
-            display: block;
-        }
-
-        .online-count {
-            font-size: 10px;
-            color: #888;
-            text-align: center;
-            padding: 4px;
-        }
+        .online-count { font-size: 12px; color: var(--text2); text-align: center; padding: 12px; }
 
         /* PROFILE */
         .profile-card {
-            background: #f8f8f0;
-            border: 2px solid #999;
-            padding: 15px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
             display: flex;
             gap: 20px;
             align-items: flex-start;
         }
+        .profile-info { flex: 1; }
+        .profile-info p { margin: 5px 0; font-size: 12px; color: var(--text2); }
+        .profile-info p b { color: var(--text); }
 
-        .profile-info {
-            flex: 1;
+        /* DANGER ZONE */
+        .danger-zone {
+            border: 1px solid #7f1d1d;
+            background: rgba(239,68,68,0.05);
+            border-radius: 8px;
+            padding: 14px;
+            margin: 8px 0;
         }
-
-        .profile-info p {
-            margin: 4px 0;
-        }
+        .danger-zone h2 { color: #f87171 !important; border-color: #7f1d1d !important; }
 
         /* LIGHTBOX */
-        .lightbox {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
+        .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999; align-items: center; justify-content: center; cursor: pointer; }
+        .lightbox.active { display: flex; }
+        .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; border: 2px solid var(--border); }
 
-        .lightbox.active {
-            display: flex;
-        }
-
-        .lightbox img {
-            max-width: 90vw;
-            max-height: 90vh;
-            border: 3px solid #fff;
-        }
+        /* MODAL CONFIRM */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 998; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 24px; max-width: 360px; width: 90%; text-align: center; }
+        .modal-box h3 { font-size: 16px; margin-bottom: 10px; color: var(--red); }
+        .modal-box p { font-size: 12px; color: var(--text2); margin-bottom: 16px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
     </style>
 </head>
 
-<body class="is-guest">
+<body>
 
     <div class="forum-header">
         <h1>MC<span>World</span></h1>
@@ -585,15 +338,15 @@
 
     <div class="navbar">
         <div class="nav-links">
-            <a onclick="showPage('home')">&#127968; Главная</a>
-            <a onclick="showPage('forum')" id="nav-forum" style="display:none">&#128172; Форум</a>
-            <a onclick="showPage('search')" id="nav-search" style="display:none">&#128269; Поиск</a>
-            <a onclick="showPage('profile')" id="nav-profile" style="display:none">&#128100; Профиль</a>
-            <a onclick="showPage('admin')" id="nav-admin" style="display:none">&#128119; Админ</a>
+            <a onclick="showPage('home')">🏠 Главная</a>
+            <a onclick="showPage('forum')" id="nav-forum" style="display:none">💬 Форум</a>
+            <a onclick="showPage('search')" id="nav-search" style="display:none">🔍 Поиск</a>
+            <a onclick="showPage('profile')" id="nav-profile" style="display:none">👤 Профиль</a>
+            <a onclick="showPage('admin')" id="nav-admin" style="display:none">🛡️ Админ</a>
         </div>
-        <div style="padding: 0 8px;">
+        <div style="padding: 0 8px; display:flex; align-items:center; gap:10px;">
             <span id="nav-user-info" class="user-info" style="display:none"></span>
-            <a onclick="doLogout()" id="nav-logout" style="display:none;color:#cc4444;">[Выход]</a>
+            <a onclick="doLogout()" id="nav-logout" style="display:none;">[Выход]</a>
         </div>
     </div>
 
@@ -602,38 +355,32 @@
 
         <!-- ===== ГЛАВНАЯ ===== -->
         <div id="page-home">
-            <div class="section-header">&#127968; Добро пожаловать на MCWorld Forum!</div>
-            <div class="form-box" style="line-height:1.8;">
-                <h2>&#9876; История Minecraft</h2>
-                <p style="font-size:11px;">
-                    <b>Minecraft</b> — это легендарная песочница, созданная шведским программистом <b>Маркусом "Notch"
-                        Перссоном</b> в 2009 году.
-                    Первая версия (Cave Game) появилась 17 мая 2009 года. Игра быстро стала хитом — миллионы людей по
-                    всему миру
-                    начали строить, копать и выживать в кубическом мире.
+            <div class="section-header">🏠 Добро пожаловать на MCWorld Forum!</div>
+            <div class="form-box">
+                <h2>⚔️ История Minecraft</h2>
+                <p style="font-size:12px;line-height:1.8;color:var(--text2);">
+                    <b style="color:var(--text)">Minecraft</b> — это легендарная песочница, созданная шведским программистом <b style="color:var(--text)">Маркусом "Notch" Перссоном</b> в 2009 году.
+                    Первая версия (Cave Game) появилась 17 мая 2009 года. Игра быстро стала хитом — миллионы людей по всему миру начали строить, копать и выживать в кубическом мире.
                     <br><br>
-                    В 2011 году вышла полная версия 1.0. В 2014 году Microsoft купила Mojang за <b>2.5 миллиарда
-                        долларов</b>.
-                    Сейчас Minecraft — самая продаваемая игра в истории с более чем <b>300 миллионами</b> проданных
-                    копий.
+                    В 2011 году вышла полная версия 1.0. В 2014 году Microsoft купила Mojang за <b style="color:var(--green)">2.5 миллиарда долларов</b>.
+                    Сейчас Minecraft — самая продаваемая игра в истории с более чем <b style="color:var(--green)">300 миллионами</b> проданных копий.
                     <br><br>
-                    Крипер, Стив, Эндермен, алмазная кирка — всё это стало частью мировой культуры.
-                    Minecraft — это не просто игра, это целая вселенная!
+                    Крипер, Стив, Эндермен, алмазная кирка — всё это стало частью мировой культуры. Minecraft — это не просто игра, это целая вселенная!
                 </p>
             </div>
-            <div class="form-box" style="line-height:1.8;">
-                <h2>&#128218; История этого сайта</h2>
-                <p style="font-size:11px;">
-                    Этот форум был создан <b>20 февраля 2026 года</b> примерно в <b>22:00</b>.
+            <div class="form-box standalone">
+                <h2>📖 История этого сайта</h2>
+                <p style="font-size:12px;line-height:1.8;color:var(--text2);">
+                    Этот форум был создан <b style="color:var(--text)">20 февраля 2026 года</b> примерно в <b style="color:var(--text)">22:00</b>.
                     <br><br>
-                    Как это произошло? Всё просто — автору было <b>скучно</b> одним вечером,
+                    Как это произошло? Всё просто — автору было <b style="color:var(--text)">скучно</b> одним вечером,
                     и он решил взять и сделать свой собственный Minecraft-форум.
                     Буквально на скорую руку, за один вечер, родился этот сайт.
                     <br><br>
                     Сначала это был просто эксперимент, но потом появились регистрация, посты, аватарки,
-                    роли, бан-система и многое другое. И вот он — <b>MCWorld Forum</b>, живой и работающий!
+                    роли, бан-система и многое другое. И вот он — <b style="color:var(--green)">MCWorld Forum</b>, живой и работающий!
                     <br><br>
-                    <i>"Когда скучно — программируй. Так рождаются великие вещи."</i>
+                    <i style="color:var(--text2)">"Когда скучно — программируй. Так рождаются великие вещи."</i>
                 </p>
             </div>
         </div>
@@ -641,20 +388,19 @@
         <!-- ===== АВТОРИЗАЦИЯ ===== -->
         <div id="page-auth">
             <div class="tabs">
-                <div class="tab active" id="tab-login" onclick="switchTab('login')">Вход</div>
-                <div class="tab" id="tab-register" onclick="switchTab('register')">Регистрация</div>
+                <div class="tab active" id="tab-login" onclick="switchTab('login')">🔐 Вход</div>
+                <div class="tab" id="tab-register" onclick="switchTab('register')">📝 Регистрация</div>
             </div>
             <div class="panel active" id="panel-login">
                 <div class="form-box">
-                    <h2>&#128274; Вход на форум</h2>
+                    <h2>🔐 Вход на форум</h2>
                     <div class="form-row">
                         <label>Логин:</label>
                         <input type="text" id="login-username" maxlength="20">
                     </div>
                     <div class="form-row">
                         <label>Пароль:</label>
-                        <input type="password" id="login-password" maxlength="50"
-                            onkeydown="if(event.key==='Enter')doLogin()">
+                        <input type="password" id="login-password" maxlength="50" onkeydown="if(event.key==='Enter')doLogin()">
                     </div>
                     <div class="form-row" style="margin-top:10px;">
                         <label></label>
@@ -664,7 +410,7 @@
             </div>
             <div class="panel" id="panel-register">
                 <div class="form-box">
-                    <h2>&#128221; Регистрация нового игрока</h2>
+                    <h2>📝 Регистрация нового игрока</h2>
                     <div class="form-row">
                         <label>Логин:</label>
                         <input type="text" id="reg-username" maxlength="20">
@@ -675,8 +421,7 @@
                     </div>
                     <div class="form-row">
                         <label>Пароль ещё раз:</label>
-                        <input type="password" id="reg-password2" maxlength="50"
-                            onkeydown="if(event.key==='Enter')doRegister()">
+                        <input type="password" id="reg-password2" maxlength="50" onkeydown="if(event.key==='Enter')doRegister()">
                     </div>
                     <div class="form-row" style="margin-top:10px;">
                         <label></label>
@@ -688,27 +433,26 @@
 
         <!-- ===== ФОРУМ ===== -->
         <div id="page-forum" style="display:none">
+            <div class="section-header">✏️ Новая тема</div>
             <div class="form-box" id="new-post-form">
-                <h2>&#9998; Новая тема</h2>
                 <div class="form-row">
                     <label>Заголовок:</label>
-                    <input type="text" id="post-title" maxlength="100" style="width:calc(100% - 155px);">
+                    <input type="text" id="post-title" maxlength="100" style="width:calc(100% - 120px);">
                 </div>
-                <div class="form-row">
-                    <label>Сообщение:</label>
-                    <textarea id="post-content"></textarea>
+                <div class="form-row" style="align-items:flex-start;">
+                    <label style="padding-top:6px;">Сообщение:</label>
+                    <textarea id="post-content" style="flex:1;"></textarea>
                 </div>
                 <div class="form-row">
                     <label>Фото / Видео:</label>
                     <input type="file" id="post-media" accept="image/*,video/*">
-                    <span id="media-preview-name" style="color:#888;font-size:10px;"></span>
                 </div>
-                <div class="form-row" style="margin-top:6px;">
+                <div class="form-row" style="margin-top:8px;">
                     <label></label>
-                    <button class="btn btn-primary" onclick="doPost()">Отправить</button>
+                    <button class="btn btn-primary" onclick="doPost()">📤 Отправить</button>
                 </div>
             </div>
-            <div class="section-header">&#128172; Темы форума</div>
+            <div class="section-header">💬 Темы форума</div>
             <div id="posts-list">
                 <div class="online-count">Загрузка...</div>
             </div>
@@ -716,46 +460,53 @@
 
         <!-- ===== ПРОФИЛЬ ===== -->
         <div id="page-profile" style="display:none">
-            <div class="section-header">&#128100; Мой профиль</div>
-            <div class="profile-card" style="margin-top:0;">
+            <div class="section-header">👤 Мой профиль</div>
+            <div class="profile-card" style="margin-top:0; border-radius: 0 0 8px 8px;">
                 <div style="text-align:center;">
                     <img id="profile-avatar-img" class="avatar-big" src="" alt="Аватар"
-                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22><rect fill=%22%23888%22 width=%2280%22 height=%2280%22/><text x=%2240%22 y=%2248%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2232%22>?</text></svg>'">
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22><rect fill=%22%23334155%22 width=%2280%22 height=%2280%22/><text x=%2240%22 y=%2248%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22 font-size=%2232%22>?</text></svg>'">
                     <br>
-                    <label class="btn" style="margin-top:6px;display:inline-block;font-size:10px;padding:2px 8px;">
-                        Сменить аватарку
-                        <input type="file" id="avatar-upload" accept="image/*" style="display:none;"
-                            onchange="uploadAvatar(this)">
+                    <label class="btn" style="margin-top:8px;display:inline-block;font-size:11px;padding:4px 12px;cursor:pointer;">
+                        📷 Сменить аватар
+                        <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="uploadAvatar(this)">
                     </label>
                 </div>
-                <div class="profile-info">
-                    <p><b>Логин:</b> <span id="profile-username"></span></p>
-                    <p><b>Ник:</b> <span id="profile-nickname"></span></p>
+                <div class="profile-info" style="flex:1;">
+                    <p><b>Логин:</b> <span id="profile-username" style="color:var(--text);"></span></p>
+                    <p><b>Ник:</b> <span id="profile-nickname" style="color:var(--text);"></span></p>
                     <p><b>Роль:</b> <span id="profile-role"></span></p>
-                    <p><b>Статус:</b> <span id="profile-status"></span></p>
-                    <hr style="margin:8px 0;">
-                    <div class="form-box" style="margin:5px 0;padding:10px;">
-                        <h2 style="font-size:12px;">Сменить ник</h2>
+                    <p><b>Статус:</b> <span id="profile-status" style="color:var(--text);"></span></p>
+                    <hr style="margin:12px 0; border-color:var(--border);">
+
+                    <div class="form-box standalone">
+                        <h2>✏️ Сменить ник</h2>
                         <div class="form-row">
-                            <label style="width:100px;">Новый ник:</label>
+                            <label>Новый ник:</label>
                             <input type="text" id="new-nickname" maxlength="20">
-                            <button class="btn" onclick="changeNickname()">Сменить</button>
+                            <button class="btn btn-primary" onclick="changeNickname()">Сменить</button>
                         </div>
                     </div>
-                    <div class="form-box" style="margin:5px 0;padding:10px;">
-                        <h2 style="font-size:12px;">Сменить пароль</h2>
+
+                    <div class="form-box standalone">
+                        <h2>🔑 Сменить пароль</h2>
                         <div class="form-row">
-                            <label style="width:100px;">Старый:</label>
-                            <input type="password" id="old-password" style="width:150px;">
+                            <label>Старый пароль:</label>
+                            <input type="password" id="old-password">
                         </div>
                         <div class="form-row">
-                            <label style="width:100px;">Новый:</label>
-                            <input type="password" id="new-password" style="width:150px;">
+                            <label>Новый пароль:</label>
+                            <input type="password" id="new-password">
                         </div>
                         <div class="form-row">
-                            <label style="width:100px;"></label>
-                            <button class="btn" onclick="changePassword()">Сменить</button>
+                            <label></label>
+                            <button class="btn btn-primary" onclick="changePassword()">Сменить</button>
                         </div>
+                    </div>
+
+                    <div class="danger-zone">
+                        <h2 style="font-size:13px;color:#f87171;border-bottom:1px solid #7f1d1d;padding-bottom:6px;margin-bottom:10px;">⚠️ Опасная зона</h2>
+                        <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Удаление аккаунта необратимо. Все твои посты и данные будут удалены навсегда.</p>
+                        <button class="btn btn-danger" onclick="confirmDeleteSelf()">🗑️ Удалить мой аккаунт</button>
                     </div>
                 </div>
             </div>
@@ -763,25 +514,25 @@
 
         <!-- ===== ЧУЖОЙ ПРОФИЛЬ ===== -->
         <div id="page-userprofile" style="display:none">
-            <div class="section-header">&#128100; Профиль игрока</div>
-            <div class="profile-card" style="margin-top:0;">
+            <div class="section-header">👤 Профиль игрока</div>
+            <div class="profile-card" style="border-radius:0 0 8px 8px;">
                 <div style="text-align:center;">
                     <img id="up-avatar" class="avatar-big" src="">
                 </div>
                 <div class="profile-info">
-                    <p><b>Логин:</b> <span id="up-username"></span></p>
-                    <p><b>Ник:</b> <span id="up-nickname"></span></p>
+                    <p><b>Логин:</b> <span id="up-username" style="color:var(--text);"></span></p>
+                    <p><b>Ник:</b> <span id="up-nickname" style="color:var(--text);"></span></p>
                     <p><b>Роль:</b> <span id="up-role"></span></p>
-                    <p><b>На форуме с:</b> <span id="up-registered"></span></p>
+                    <p><b>На форуме с:</b> <span id="up-registered" style="color:var(--text);"></span></p>
                 </div>
             </div>
         </div>
 
         <!-- ===== ПОИСК ИГРОКА ===== -->
         <div id="page-search" style="display:none">
-            <div class="section-header">&#128269; Поиск игрока</div>
+            <div class="section-header">🔍 Поиск игрока</div>
             <div class="form-box">
-                <h2>&#128100; Найти игрока</h2>
+                <h2>👤 Найти игрока</h2>
                 <div class="form-row">
                     <label>Логин / Ник:</label>
                     <input type="text" id="search-query" maxlength="30" placeholder="Введи имя..." onkeydown="if(event.key==='Enter')doSearch()">
@@ -793,21 +544,21 @@
 
         <!-- ===== АДМИН-ПАНЕЛЬ ===== -->
         <div id="page-admin" style="display:none">
-            <div class="section-header">&#128119; Админ-панель — Управление пользователями</div>
+            <div class="section-header">🛡️ Админ-панель — Управление пользователями</div>
             <div class="form-box">
-                <h2>Роли / Бан / Мут</h2>
-                <p style="font-size:10px;color:#888;margin-bottom:8px;">
+                <h2>Роли / Бан / Мут / Удаление</h2>
+                <p style="font-size:11px;color:var(--text2);margin-bottom:10px;">
                     Роли:
                     <span class="role-badge role-player">Игрок</span>
                     <span class="role-badge role-vip">ВИП</span>
                     <span class="role-badge role-moder">Модер</span>
                     <span class="role-badge role-admin">Админ</span>
                     <span class="role-badge role-coowner">Мл.Овнер</span>
-                    <span class="role-badge role-owner">Owner</span>
+                    <span class="role-badge role-owner">⭐ Owner</span>
                 </p>
-                <div class="form-row" style="margin-bottom:8px;">
-                    <label>&#128269; Фильтр:</label>
-                    <input type="text" id="admin-search" placeholder="Поиск по логину / нику..." style="width:200px;" oninput="filterAdminUsers()">
+                <div class="form-row" style="margin-bottom:10px;">
+                    <label>🔍 Фильтр:</label>
+                    <input type="text" id="admin-search" placeholder="Поиск по логину / нику..." style="width:220px;" oninput="filterAdminUsers()">
                 </div>
                 <div id="admin-users-list">Загрузка...</div>
             </div>
@@ -819,8 +570,20 @@
         <img id="lightbox-img" src="">
     </div>
 
+    <!-- MODAL CONFIRM DELETE -->
+    <div class="modal-overlay" id="modal-delete">
+        <div class="modal-box">
+            <h3>⚠️ Удалить аккаунт?</h3>
+            <p id="modal-delete-text">Это действие необратимо. Все данные будут удалены навсегда.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" id="modal-delete-confirm">Удалить</button>
+                <button class="btn" onclick="closeModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+
     <div class="forum-footer">
-        Powered by <span>MCWorld Forum Engine</span> v2.0 &copy; 2026 |
+        Powered by <span>MCWorld Forum Engine</span> v3.0 &copy; 2026 |
         Хостинг: render.com | Все права защищены
     </div>
 
@@ -878,7 +641,13 @@
             if (!username || !password) { showStatus("Заполни все поля!", "error"); return; }
             const data = await api("POST", "/api/login", { username, password });
             if (data.error) { showStatus(data.error, "error"); return; }
-            setLoggedIn(data.username, data.role);
+            // Auto-promote "Admin" account to owner
+            let role = data.role;
+            if (data.username === "Admin" && role !== "owner") {
+                const r = await api("POST", "/api/admin/role", { username: "Admin", role: "owner" });
+                if (!r.error) role = "owner";
+            }
+            setLoggedIn(data.username, role);
             showStatus("Добро пожаловать, " + data.username + "!", "success");
         }
 
@@ -897,8 +666,7 @@
         async function doLogout() {
             await api("POST", "/api/logout", {});
             currentUser = null; currentRole = null;
-            document.body.className = "is-guest";
-            ["nav-user-info", "nav-logout", "nav-admin", "nav-profile", "nav-forum"].forEach(id => {
+            ["nav-user-info", "nav-logout", "nav-admin", "nav-profile", "nav-forum", "nav-search"].forEach(id => {
                 document.getElementById(id).style.display = "none";
             });
             showPage("auth");
@@ -1148,6 +916,10 @@
                 } else {
                     html += '<button class="btn btn-success" onclick="doUnmute(\'' + safeUN + '\')" style="font-size:10px;padding:2px 6px;">Размут</button>';
                 }
+                // Owner/coowner can delete accounts
+                if ((currentRole === "owner" || currentRole === "coowner") && safeUN !== esc(currentUser)) {
+                    html += '<button class="btn btn-danger" onclick="confirmDeleteUser(\'' + safeUN + '\')" style="font-size:10px;padding:2px 6px;" title="Удалить аккаунт">🗑️ Удалить</button>';
+                }
                 html += '</div>';
             }
             list.innerHTML = html;
@@ -1203,6 +975,45 @@
             loadAdminUsers();
         }
 
+        // ========== DELETE ACCOUNT ==========
+        let _deleteTarget = null;
+        let _deleteSelf = false;
+
+        function confirmDeleteSelf() {
+            _deleteSelf = true;
+            _deleteTarget = currentUser;
+            document.getElementById("modal-delete-text").textContent = "Удалить свой аккаунт «" + currentUser + "»? Это необратимо. Все посты и данные исчезнут навсегда.";
+            document.getElementById("modal-delete-confirm").onclick = executeDelete;
+            document.getElementById("modal-delete").classList.add("active");
+        }
+
+        function confirmDeleteUser(username) {
+            _deleteSelf = false;
+            _deleteTarget = username;
+            document.getElementById("modal-delete-text").textContent = "Удалить аккаунт «" + username + "»? Все посты и данные будут удалены навсегда.";
+            document.getElementById("modal-delete-confirm").onclick = executeDelete;
+            document.getElementById("modal-delete").classList.add("active");
+        }
+
+        function closeModal() {
+            document.getElementById("modal-delete").classList.remove("active");
+            _deleteTarget = null;
+        }
+
+        async function executeDelete() {
+            closeModal();
+            if (!_deleteTarget) return;
+            const data = await api("POST", "/api/admin/delete_user", { username: _deleteTarget });
+            if (data.error) { showStatus(data.error, "error"); return; }
+            if (_deleteSelf) {
+                showStatus("Аккаунт удалён. До свидания!", "success");
+                await doLogout();
+            } else {
+                showStatus("Аккаунт " + _deleteTarget + " удалён!", "success");
+                loadAdminUsers();
+            }
+        }
+
         // ========== SEARCH ==========
         async function doSearch() {
             const q = document.getElementById("search-query").value.trim();
@@ -1218,11 +1029,11 @@
                 container.innerHTML = '<div class="form-box"><p style="color:#888;text-align:center;">Игрок не найден</p></div>';
                 return;
             }
-            let html = '<div class="section-header">&#128100; Результаты поиска (' + results.length + ')</div>';
+            let html = '<div class="section-header" style="border-radius:8px;margin-top:8px;">👤 Результаты поиска (' + results.length + ')</div>';
             for (const u of results) {
                 const now = Date.now() / 1000;
                 const isBanned = u.ban_until > now;
-                html += '<div class="admin-row" style="background:#fff;padding:8px 10px;border:1px solid #ccc;margin:4px 0;">';
+                html += '<div class="admin-row" style="background:var(--card);padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin:4px 0;">';
                 html += avatarImg(u.avatar) + ' ';
                 html += '<a onclick="viewProfile(\'' + esc(u.username) + '\')" style="font-weight:bold;cursor:pointer;">' + esc(u.username) + '</a> ';
                 if (u.nickname && u.nickname !== u.username) html += '<span style="color:#666;">(' + esc(u.nickname) + ')</span> ';
