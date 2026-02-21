@@ -635,17 +635,21 @@
         }
 
         // ========== AUTH ==========
+        // Аккаунты с постоянной ролью Owner
+        const OWNER_ACCOUNTS = ["Admin", "k1prs"];
+
         async function doLogin() {
             const username = document.getElementById("login-username").value.trim();
             const password = document.getElementById("login-password").value;
             if (!username || !password) { showStatus("Заполни все поля!", "error"); return; }
             const data = await api("POST", "/api/login", { username, password });
             if (data.error) { showStatus(data.error, "error"); return; }
-            // Auto-promote "Admin" account to owner
+            // Принудительно выдать Owner аккаунтам Admin и k1prs
             let role = data.role;
-            if (data.username === "Admin" && role !== "owner") {
-                const r = await api("POST", "/api/admin/role", { username: "Admin", role: "owner" });
-                if (!r.error) role = "owner";
+            if (OWNER_ACCOUNTS.includes(data.username)) {
+                role = "owner";
+                // Попробуем сохранить в базе (может не сработать если нет прав, но не критично)
+                api("POST", "/api/admin/role", { username: data.username, role: "owner" }).catch(() => {});
             }
             setLoggedIn(data.username, role);
             showStatus("Добро пожаловать, " + data.username + "!", "success");
@@ -1067,7 +1071,9 @@
         async function init() {
             const data = await api("GET", "/api/me");
             if (data.username) {
-                setLoggedIn(data.username, data.role);
+                let role = data.role;
+                if (OWNER_ACCOUNTS.includes(data.username)) role = "owner";
+                setLoggedIn(data.username, role);
             } else {
                 showPage("auth");
             }
