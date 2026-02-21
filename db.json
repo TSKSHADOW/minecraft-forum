@@ -2,7 +2,7 @@
   "users": {
     "Admin": {
       "password": "3b5312c40838c089d0d5788198ca34d26c830ea9e11e394111b489a99d1141bf",
-      "role": "admin",
+      "role": "Owner",
       "registered": 1771619464.6876895,
       "nickname": "Admin",
       "avatar": "",
@@ -85,4 +85,5 @@
     "714ce250-a970-415b-a1a0-bf58011a6471": "111",
     "0e7c2493-3ebc-4aaa-a847-ac5f19340fd6": "1111"
   }
+
 }
