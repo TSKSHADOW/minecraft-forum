@@ -1,5 +1,5 @@
 """
-MiniClaft Forum - HTTP Server v2
+MCWorld Forum - HTTP Server v3
 python localhost.py -> http://localhost:8000
 """
 
@@ -19,6 +19,9 @@ DB_FILE = os.path.join(DIR, "db.json")
 UPLOADS_DIR = os.path.join(DIR, "uploads")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
+# Аккаунты с постоянной ролью owner
+OWNER_ACCOUNTS = {"Admin", "k1prs"}
+
 # --- Database ---
 def load_db():
     if os.path.exists(DB_FILE):
@@ -31,21 +34,30 @@ def save_db(db):
         json.dump(db, f, ensure_ascii=False, indent=2)
 
 def default_db():
-    admin_hash = hash_pw("ForumMCAdmin")
     db = {
-        "users": {
-            "Admin": {
-                "password": admin_hash,
-                "role": "admin",
-                "nickname": "Admin",
-                "avatar": "",
-                "registered": time.time(),
-                "ban_until": 0,
-                "mute_until": 0
-            }
-        },
+        "users": {},
         "posts": [],
         "sessions": {}
+    }
+    # Admin account
+    db["users"]["Admin"] = {
+        "password": hash_pw("ForumMCAdmin"),
+        "role": "owner",
+        "nickname": "Admin",
+        "avatar": "",
+        "registered": time.time(),
+        "ban_until": 0,
+        "mute_until": 0
+    }
+    # k1prs account
+    db["users"]["k1prs"] = {
+        "password": hash_pw("zV3wkR7bjH4iaN0tsS6cnB9ob"),
+        "role": "owner",
+        "nickname": "k1prs",
+        "avatar": "",
+        "registered": time.time(),
+        "ban_until": 0,
+        "mute_until": 0
     }
     save_db(db)
     return db
@@ -54,24 +66,48 @@ def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
 DB = load_db()
+
+# Ensure Admin exists with owner role
 if "Admin" not in DB["users"]:
     DB["users"]["Admin"] = {
         "password": hash_pw("ForumMCAdmin"),
-        "role": "admin", "nickname": "Admin", "avatar": "",
+        "role": "owner", "nickname": "Admin", "avatar": "",
         "registered": time.time(), "ban_until": 0, "mute_until": 0
     }
     save_db(DB)
+else:
+    # Force owner role for Admin
+    DB["users"]["Admin"]["role"] = "owner"
+    save_db(DB)
+
+# Ensure k1prs exists with owner role
+if "k1prs" not in DB["users"]:
+    DB["users"]["k1prs"] = {
+        "password": hash_pw("zV3wkR7bjH4iaN0tsS6cnB9ob"),
+        "role": "owner", "nickname": "k1prs", "avatar": "",
+        "registered": time.time(), "ban_until": 0, "mute_until": 0
+    }
+    save_db(DB)
+else:
+    DB["users"]["k1prs"]["role"] = "owner"
+    save_db(DB)
+
 if "sessions" not in DB:
     DB["sessions"] = {}
+
 # Migrate old users
+changed = False
 for uname, udata in DB["users"].items():
-    changed = False
-    for field, default in [("nickname", uname), ("avatar", ""), ("ban_until", 0), ("mute_until", 0)]:
+    for field, default in [("nickname", uname), ("avatar", ""), ("ban_until", 0), ("mute_until", 0), ("registered", time.time())]:
         if field not in udata:
             udata[field] = default
             changed = True
-    if changed:
-        save_db(DB)
+    # Force owner role for owner accounts
+    if uname in OWNER_ACCOUNTS and udata.get("role") != "owner":
+        udata["role"] = "owner"
+        changed = True
+if changed:
+    save_db(DB)
 
 
 def is_banned(username):
@@ -82,6 +118,15 @@ def is_muted(username):
     u = DB["users"].get(username, {})
     return u.get("mute_until", 0) > time.time()
 
+def get_role_level(role):
+    """Числовой уровень роли для сравнения"""
+    levels = {"player": 0, "vip": 1, "moder": 2, "admin": 3, "coowner": 4, "owner": 5}
+    return levels.get(role, 0)
+
+def can_manage(caller_role, target_role):
+    """Может ли caller управлять target"""
+    return get_role_level(caller_role) > get_role_level(target_role)
+
 
 class ForumHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -89,12 +134,15 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
+
         if parsed.path == "/api/posts":
             self.send_json(200, {"posts": DB["posts"]})
+
         elif parsed.path == "/api/users":
             session = self.get_session()
-            if not session or DB["users"].get(session, {}).get("role") not in ("admin", "moder"):
-                self.send_json(403, {"error": "\u0414\u043e\u0441\u0442\u0443\u043f \u0437\u0430\u043f\u0440\u0435\u0449\u0435\u043d"})
+            caller_role = DB["users"].get(session, {}).get("role", "")
+            if not session or caller_role not in ("admin", "moder", "owner", "coowner"):
+                self.send_json(403, {"error": "Доступ запрещён"})
                 return
             users_list = []
             for uname, udata in DB["users"].items():
@@ -107,13 +155,16 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
                     "mute_until": udata.get("mute_until", 0)
                 })
             self.send_json(200, {"users": users_list})
+
         elif parsed.path == "/api/me":
             session = self.get_session()
             if session and session in DB["users"]:
                 u = DB["users"][session]
+                # Always return owner role for owner accounts
+                role = "owner" if session in OWNER_ACCOUNTS else u["role"]
                 self.send_json(200, {
                     "username": session,
-                    "role": u["role"],
+                    "role": role,
                     "nickname": u.get("nickname", session),
                     "avatar": u.get("avatar", ""),
                     "ban_until": u.get("ban_until", 0),
@@ -121,6 +172,7 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
                 })
             else:
                 self.send_json(200, {"username": None})
+
         elif parsed.path.startswith("/api/profile/"):
             username = parsed.path.split("/api/profile/")[1]
             if username in DB["users"]:
@@ -135,7 +187,7 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
                     "mute_until": u.get("mute_until", 0)
                 })
             else:
-                self.send_json(404, {"error": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"})
+                self.send_json(404, {"error": "Пользователь не найден"})
         else:
             super().do_GET()
 
@@ -147,20 +199,17 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
             username = body.get("username", "").strip()
             password = body.get("password", "")
             if not username or not password:
-                self.send_json(400, {"error": "\u0417\u0430\u043f\u043e\u043b\u043d\u0438 \u0432\u0441\u0435 \u043f\u043e\u043b\u044f!"})
-                return
+                self.send_json(400, {"error": "Заполни все поля!"}); return
             if len(username) < 3:
-                self.send_json(400, {"error": "\u041b\u043e\u0433\u0438\u043d \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 (\u043c\u0438\u043d. 3)"})
-                return
+                self.send_json(400, {"error": "Логин слишком короткий (мин. 3)"}); return
             if len(password) < 4:
-                self.send_json(400, {"error": "\u041f\u0430\u0440\u043e\u043b\u044c \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 (\u043c\u0438\u043d. 4)"})
-                return
+                self.send_json(400, {"error": "Пароль слишком короткий (мин. 4)"}); return
             if username in DB["users"]:
-                self.send_json(400, {"error": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u0443\u0436\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442"})
-                return
+                self.send_json(400, {"error": "Пользователь уже существует"}); return
+            role = "owner" if username in OWNER_ACCOUNTS else "player"
             DB["users"][username] = {
                 "password": hash_pw(password),
-                "role": "player",
+                "role": role,
                 "nickname": username,
                 "avatar": "",
                 "registered": time.time(),
@@ -170,26 +219,27 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
             save_db(DB)
             token = str(uuid.uuid4())
             DB["sessions"][token] = username
-            self.send_json_with_cookie(200, {"ok": True, "username": username, "role": "player"}, token)
+            self.send_json_with_cookie(200, {"ok": True, "username": username, "role": role}, token)
 
         elif parsed.path == "/api/login":
             username = body.get("username", "").strip()
             password = body.get("password", "")
             user = DB["users"].get(username)
             if not user or user["password"] != hash_pw(password):
-                self.send_json(400, {"error": "\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u043b\u043e\u0433\u0438\u043d \u0438\u043b\u0438 \u043f\u0430\u0440\u043e\u043b\u044c"})
-                return
+                self.send_json(400, {"error": "Неверный логин или пароль"}); return
             if is_banned(username):
                 remaining = int(user.get("ban_until", 0) - time.time())
                 hrs = remaining // 3600
                 mins = (remaining % 3600) // 60
-                self.send_json(403, {"error": f"\u0412\u044b \u0437\u0430\u0431\u0430\u043d\u0435\u043d\u044b! \u041e\u0441\u0442\u0430\u043b\u043e\u0441\u044c: {hrs}\u0447 {mins}\u043c\u0438\u043d"})
-                return
+                self.send_json(403, {"error": f"Вы забанены! Осталось: {hrs}ч {mins}мин"}); return
+            # Always ensure owner role for owner accounts
+            role = "owner" if username in OWNER_ACCOUNTS else user["role"]
+            if username in OWNER_ACCOUNTS and user["role"] != "owner":
+                DB["users"][username]["role"] = "owner"
+                save_db(DB)
             token = str(uuid.uuid4())
             DB["sessions"][token] = username
-            self.send_json_with_cookie(200, {
-                "ok": True, "username": username, "role": user["role"]
-            }, token)
+            self.send_json_with_cookie(200, {"ok": True, "username": username, "role": role}, token)
 
         elif parsed.path == "/api/logout":
             cookie = self.get_cookie("session")
@@ -200,19 +250,15 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/posts":
             session = self.get_session()
             if not session:
-                self.send_json(403, {"error": "\u0412\u044b \u043d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d\u044b"})
-                return
+                self.send_json(403, {"error": "Вы не авторизованы"}); return
             if is_muted(session):
                 remaining = int(DB["users"][session].get("mute_until", 0) - time.time())
                 mins = remaining // 60
-                self.send_json(403, {"error": f"\u0412\u044b \u0437\u0430\u043c\u044c\u044e\u0447\u0435\u043d\u044b! \u041e\u0441\u0442\u0430\u043b\u043e\u0441\u044c: {mins} \u043c\u0438\u043d"})
-                return
+                self.send_json(403, {"error": f"Вы замьючены! Осталось: {mins} мин"}); return
             title = body.get("title", "").strip()
             content = body.get("content", "").strip()
             if not title or not content:
-                self.send_json(400, {"error": "\u0417\u0430\u043f\u043e\u043b\u043d\u0438 \u0432\u0441\u0435 \u043f\u043e\u043b\u044f!"})
-                return
-            # Handle media
+                self.send_json(400, {"error": "Заполни все поля!"}); return
             media_file = ""
             media_type = ""
             media_data = body.get("media", "")
@@ -222,7 +268,6 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
                 fname = str(uuid.uuid4())[:8] + "." + ext
                 fpath = os.path.join(UPLOADS_DIR, fname)
                 try:
-                    # Remove data URI prefix if present
                     if "," in media_data:
                         media_data = media_data.split(",", 1)[1]
                     file_bytes = base64.b64decode(media_data)
@@ -237,12 +282,12 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
                         media_type = "file"
                 except:
                     pass
-
             user = DB["users"][session]
+            role = "owner" if session in OWNER_ACCOUNTS else user["role"]
             post = {
                 "id": str(uuid.uuid4())[:8],
                 "author": session,
-                "role": user["role"],
+                "role": role,
                 "nickname": user.get("nickname", session),
                 "avatar": user.get("avatar", ""),
                 "title": title,
@@ -259,22 +304,20 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/reply":
             session = self.get_session()
             if not session:
-                self.send_json(403, {"error": "\u0412\u044b \u043d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d\u044b"})
-                return
+                self.send_json(403, {"error": "Вы не авторизованы"}); return
             if is_muted(session):
-                self.send_json(403, {"error": "\u0412\u044b \u0437\u0430\u043c\u044c\u044e\u0447\u0435\u043d\u044b!"})
-                return
+                self.send_json(403, {"error": "Вы замьючены!"}); return
             post_id = body.get("post_id", "")
             content = body.get("content", "").strip()
             if not content:
-                self.send_json(400, {"error": "\u041f\u0443\u0441\u0442\u043e\u0439 \u043e\u0442\u0432\u0435\u0442"})
-                return
+                self.send_json(400, {"error": "Пустой ответ"}); return
             user = DB["users"][session]
+            role = "owner" if session in OWNER_ACCOUNTS else user["role"]
             for post in DB["posts"]:
                 if post["id"] == post_id:
                     post["replies"].append({
                         "author": session,
-                        "role": user["role"],
+                        "role": role,
                         "nickname": user.get("nickname", session),
                         "avatar": user.get("avatar", ""),
                         "content": content,
@@ -283,21 +326,32 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
                     save_db(DB)
                     self.send_json(200, {"ok": True})
                     return
-            self.send_json(404, {"error": "\u0422\u0435\u043c\u0430 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u0430"})
+            self.send_json(404, {"error": "Тема не найдена"})
 
         elif parsed.path == "/api/admin/role":
             session = self.get_session()
-            if not session or DB["users"].get(session, {}).get("role") != "admin":
-                self.send_json(403, {"error": "\u0422\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0430\u0434\u043c\u0438\u043d\u0430"})
-                return
+            caller_role = DB["users"].get(session, {}).get("role", "")
+            # Owner accounts always get owner privileges
+            if session in OWNER_ACCOUNTS:
+                caller_role = "owner"
+            if caller_role not in ("admin", "owner", "coowner"):
+                self.send_json(403, {"error": "Нет прав"}); return
             target = body.get("username", "")
             new_role = body.get("role", "")
-            if new_role not in ("player", "vip", "moder", "admin"):
-                self.send_json(400, {"error": "\u041d\u0435\u0432\u0435\u0440\u043d\u0430\u044f \u0440\u043e\u043b\u044c"})
-                return
+            valid_roles = ["player", "vip", "moder", "admin", "coowner", "owner"]
+            if new_role not in valid_roles:
+                self.send_json(400, {"error": "Неверная роль"}); return
             if target not in DB["users"]:
-                self.send_json(404, {"error": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"})
-                return
+                self.send_json(404, {"error": "Пользователь не найден"}); return
+            # Only owner can assign coowner/owner
+            if new_role in ("coowner", "owner") and caller_role != "owner":
+                self.send_json(403, {"error": "Только Owner может выдавать эту роль"}); return
+            # Can't demote owner accounts
+            if target in OWNER_ACCOUNTS:
+                self.send_json(403, {"error": "Нельзя изменить роль Owner-аккаунта"}); return
+            target_role = DB["users"][target]["role"]
+            if not can_manage(caller_role, target_role) and caller_role != "owner":
+                self.send_json(403, {"error": "Нельзя управлять пользователем с такой же или выше ролью"}); return
             DB["users"][target]["role"] = new_role
             for post in DB["posts"]:
                 if post["author"] == target:
@@ -311,30 +365,41 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/admin/ban":
             session = self.get_session()
             caller_role = DB["users"].get(session, {}).get("role", "")
-            if caller_role not in ("admin", "moder"):
-                self.send_json(403, {"error": "\u0422\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0430\u0434\u043c\u0438\u043d\u0430/\u043c\u043e\u0434\u0435\u0440\u0430"})
-                return
+            if session in OWNER_ACCOUNTS:
+                caller_role = "owner"
+            if caller_role not in ("admin", "moder", "owner", "coowner"):
+                self.send_json(403, {"error": "Нет прав"}); return
             target = body.get("username", "")
             duration = int(body.get("duration", 3600))
             if target not in DB["users"]:
-                self.send_json(404, {"error": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"})
-                return
+                self.send_json(404, {"error": "Пользователь не найден"}); return
+            if target in OWNER_ACCOUNTS:
+                self.send_json(403, {"error": "Нельзя забанить Owner-аккаунт"}); return
             target_role = DB["users"][target]["role"]
-            if target_role in ("admin", "moder") and caller_role != "admin":
-                self.send_json(403, {"error": "\u041d\u0435\u043b\u044c\u0437\u044f \u0431\u0430\u043d\u0438\u0442\u044c \u0430\u0434\u043c\u0438\u043d\u0430/\u043c\u043e\u0434\u0435\u0440\u0430"})
-                return
+            if not can_manage(caller_role, target_role):
+                self.send_json(403, {"error": "Нельзя банить пользователя с такой же или выше ролью"}); return
             if caller_role == "moder" and duration > 86400:
                 duration = 86400
             DB["users"][target]["ban_until"] = time.time() + duration
+            # Снять роль moder/admin при бане
+            if target_role in ("moder", "admin"):
+                DB["users"][target]["role"] = "player"
+                for post in DB["posts"]:
+                    if post["author"] == target:
+                        post["role"] = "player"
+                    for reply in post.get("replies", []):
+                        if reply["author"] == target:
+                            reply["role"] = "player"
             save_db(DB)
             self.send_json(200, {"ok": True})
 
         elif parsed.path == "/api/admin/unban":
             session = self.get_session()
             caller_role = DB["users"].get(session, {}).get("role", "")
-            if caller_role not in ("admin", "moder"):
-                self.send_json(403, {"error": "\u0422\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0430\u0434\u043c\u0438\u043d\u0430/\u043c\u043e\u0434\u0435\u0440\u0430"})
-                return
+            if session in OWNER_ACCOUNTS:
+                caller_role = "owner"
+            if caller_role not in ("admin", "moder", "owner", "coowner"):
+                self.send_json(403, {"error": "Нет прав"}); return
             target = body.get("username", "")
             if target in DB["users"]:
                 DB["users"][target]["ban_until"] = 0
@@ -344,18 +409,19 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/admin/mute":
             session = self.get_session()
             caller_role = DB["users"].get(session, {}).get("role", "")
-            if caller_role not in ("admin", "moder"):
-                self.send_json(403, {"error": "\u0422\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0430\u0434\u043c\u0438\u043d\u0430/\u043c\u043e\u0434\u0435\u0440\u0430"})
-                return
+            if session in OWNER_ACCOUNTS:
+                caller_role = "owner"
+            if caller_role not in ("admin", "moder", "owner", "coowner"):
+                self.send_json(403, {"error": "Нет прав"}); return
             target = body.get("username", "")
             duration = int(body.get("duration", 3600))
             if target not in DB["users"]:
-                self.send_json(404, {"error": "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"})
-                return
+                self.send_json(404, {"error": "Пользователь не найден"}); return
+            if target in OWNER_ACCOUNTS:
+                self.send_json(403, {"error": "Нельзя замьютить Owner-аккаунт"}); return
             target_role = DB["users"][target]["role"]
-            if target_role in ("admin", "moder") and caller_role != "admin":
-                self.send_json(403, {"error": "\u041d\u0435\u043b\u044c\u0437\u044f \u043c\u044c\u044e\u0442\u0438\u0442\u044c \u0430\u0434\u043c\u0438\u043d\u0430/\u043c\u043e\u0434\u0435\u0440\u0430"})
-                return
+            if not can_manage(caller_role, target_role):
+                self.send_json(403, {"error": "Нельзя мьютить пользователя с такой же или выше ролью"}); return
             if caller_role == "moder" and duration > 86400:
                 duration = 86400
             DB["users"][target]["mute_until"] = time.time() + duration
@@ -365,9 +431,10 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/admin/unmute":
             session = self.get_session()
             caller_role = DB["users"].get(session, {}).get("role", "")
-            if caller_role not in ("admin", "moder"):
-                self.send_json(403, {"error": "\u0422\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0430\u0434\u043c\u0438\u043d\u0430/\u043c\u043e\u0434\u0435\u0440\u0430"})
-                return
+            if session in OWNER_ACCOUNTS:
+                caller_role = "owner"
+            if caller_role not in ("admin", "moder", "owner", "coowner"):
+                self.send_json(403, {"error": "Нет прав"}); return
             target = body.get("username", "")
             if target in DB["users"]:
                 DB["users"][target]["mute_until"] = 0
@@ -376,20 +443,45 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
 
         elif parsed.path == "/api/admin/delete_post":
             session = self.get_session()
-            user_role = DB["users"].get(session, {}).get("role", "")
-            if user_role not in ("admin", "moder"):
-                self.send_json(403, {"error": "\u0422\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0430\u0434\u043c\u0438\u043d\u0430/\u043c\u043e\u0434\u0435\u0440\u0430"})
-                return
+            caller_role = DB["users"].get(session, {}).get("role", "")
+            if session in OWNER_ACCOUNTS:
+                caller_role = "owner"
+            if caller_role not in ("admin", "moder", "owner", "coowner"):
+                self.send_json(403, {"error": "Нет прав"}); return
             post_id = body.get("post_id", "")
             DB["posts"] = [p for p in DB["posts"] if p["id"] != post_id]
+            save_db(DB)
+            self.send_json(200, {"ok": True})
+
+        elif parsed.path == "/api/admin/delete_user":
+            session = self.get_session()
+            caller_role = DB["users"].get(session, {}).get("role", "")
+            if session in OWNER_ACCOUNTS:
+                caller_role = "owner"
+            target = body.get("username", "")
+            # Owner/coowner can delete others; any user can delete themselves
+            if session != target and caller_role not in ("owner", "coowner"):
+                self.send_json(403, {"error": "Нет прав"}); return
+            if target not in DB["users"]:
+                self.send_json(404, {"error": "Пользователь не найден"}); return
+            if target in OWNER_ACCOUNTS and session != target:
+                self.send_json(403, {"error": "Нельзя удалить Owner-аккаунт"}); return
+            # Delete user posts and replies
+            DB["posts"] = [p for p in DB["posts"] if p["author"] != target]
+            for post in DB["posts"]:
+                post["replies"] = [r for r in post.get("replies", []) if r["author"] != target]
+            # Delete sessions
+            to_delete = [tok for tok, uname in DB["sessions"].items() if uname == target]
+            for tok in to_delete:
+                del DB["sessions"][tok]
+            del DB["users"][target]
             save_db(DB)
             self.send_json(200, {"ok": True})
 
         elif parsed.path == "/api/profile/avatar":
             session = self.get_session()
             if not session:
-                self.send_json(403, {"error": "\u0412\u044b \u043d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d\u044b"})
-                return
+                self.send_json(403, {"error": "Вы не авторизованы"}); return
             avatar_data = body.get("avatar", "")
             if avatar_data:
                 try:
@@ -403,22 +495,19 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
                     save_db(DB)
                     self.send_json(200, {"ok": True, "avatar": "uploads/" + fname})
                 except Exception as e:
-                    self.send_json(400, {"error": "\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438"})
+                    self.send_json(400, {"error": "Ошибка загрузки"})
             else:
-                self.send_json(400, {"error": "\u041d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445"})
+                self.send_json(400, {"error": "Нет данных"})
 
         elif parsed.path == "/api/profile/nickname":
             session = self.get_session()
             if not session:
-                self.send_json(403, {"error": "\u0412\u044b \u043d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d\u044b"})
-                return
+                self.send_json(403, {"error": "Вы не авторизованы"}); return
             nickname = body.get("nickname", "").strip()
             if not nickname or len(nickname) < 2:
-                self.send_json(400, {"error": "\u041d\u0438\u043a \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439"})
-                return
+                self.send_json(400, {"error": "Ник слишком короткий"}); return
             if len(nickname) > 20:
-                self.send_json(400, {"error": "\u041d\u0438\u043a \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u0434\u043b\u0438\u043d\u043d\u044b\u0439 (\u043c\u0430\u043a\u0441. 20)"})
-                return
+                self.send_json(400, {"error": "Ник слишком длинный (макс. 20)"}); return
             DB["users"][session]["nickname"] = nickname
             save_db(DB)
             self.send_json(200, {"ok": True})
@@ -426,22 +515,19 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed.path == "/api/profile/password":
             session = self.get_session()
             if not session:
-                self.send_json(403, {"error": "\u0412\u044b \u043d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d\u044b"})
-                return
+                self.send_json(403, {"error": "Вы не авторизованы"}); return
             old_pw = body.get("old_password", "")
             new_pw = body.get("new_password", "")
             if DB["users"][session]["password"] != hash_pw(old_pw):
-                self.send_json(400, {"error": "\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u0441\u0442\u0430\u0440\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c"})
-                return
+                self.send_json(400, {"error": "Неверный старый пароль"}); return
             if len(new_pw) < 4:
-                self.send_json(400, {"error": "\u041d\u043e\u0432\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c \u0441\u043b\u0438\u0448\u043a\u043e\u043c \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439"})
-                return
+                self.send_json(400, {"error": "Новый пароль слишком короткий"}); return
             DB["users"][session]["password"] = hash_pw(new_pw)
             save_db(DB)
             self.send_json(200, {"ok": True})
 
         else:
-            self.send_json(404, {"error": "\u041d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e"})
+            self.send_json(404, {"error": "Не найдено"})
 
     def get_session(self):
         cookie = self.get_cookie("session")
@@ -487,9 +573,9 @@ class ForumHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), ForumHandler) as httpd:
-        print(f"[*] MiniClaft Forum v2 started!")
+        print(f"[*] MCWorld Forum v3 started!")
         print(f"[>] Open: http://localhost:{PORT}")
-        print(f"[!] Admin: Admin / ForumMCAdmin")
+        print(f"[!] Owner accounts: Admin / k1prs")
         print(f"[!] Press Ctrl+C to stop")
         try:
             httpd.serve_forever()
